@@ -1,20 +1,58 @@
 package com.ontological.retrieval.Utilities;
 
+import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.JCasRegistry;
+import org.apache.uima.jcas.cas.TOP_Type;
+import org.apache.uima.jcas.tcas.Annotation;
+
 /**
  * @author Dmitry Scherbakov
  * @email dm.scherbakov@yandex.ru
  */
-public class TripletScore
+public class TripletScore extends Annotation
 {
     private static final int SENTENCE_SIZE_LOW_BOUND = 5;
     private static final int SENTENCE_SIZE_MIDDLE_BOUND = 9;
     private static final int SENTENCE_SIZE_HIGHEST_BOUND = 18;
 
-    private double m_Score;
+    public final static int typeIndexID = JCasRegistry.register( TripletScore.class );
 
-    public TripletScore( int sentenceSize, int undeterminedRelationsCount, int mainPointsCount )
+    public final static int type = typeIndexID;
+
+    @Override
+    public int getTypeIndexID() {
+        return typeIndexID;
+    }
+
+    private int m_MainPointsCount = 0;
+
+    private double m_Score = 1.0;
+
+    protected TripletScore() {}
+
+    public TripletScore( int addr, TOP_Type type ) {
+        super( addr, type );
+    }
+
+    public TripletScore( JCas jcas ) {
+        super( jcas );
+    }
+
+    public TripletScore( JCas jcas, int begin, int end ) {
+        super(jcas);
+        setBegin(begin);
+        setEnd(end);
+    }
+
+    public TripletScore( JCas jCas, int sentenceSize, int undeterminedRelationsCount, int mainPointsCount )
     {
+        super( jCas );
+        m_MainPointsCount = mainPointsCount;
         m_Score = calculateScore( sentenceSize, undeterminedRelationsCount, mainPointsCount );
+    }
+
+    public int getMainPointsCount() {
+        return m_MainPointsCount;
     }
 
     public double getScoreValue() {

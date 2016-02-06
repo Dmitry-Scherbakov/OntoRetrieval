@@ -61,14 +61,13 @@ public class Main {
                     TextReader.PARAM_LANGUAGE, "ru" );
 
             runPipeline( readerDescription,
-                    createEngineDescription(BreakIteratorSegmenter.class),
-                    createEngineDescription(TreeTaggerPosTagger.class),
-                    createEngineDescription(NPNEWriter.class) );
+                    createEngineDescription( BreakIteratorSegmenter.class ),
+                    createEngineDescription( TreeTaggerPosTagger.class ) );
         } catch ( UIMAException ex ) {
-            System.out.print("[ EN ] UIMAException: " + ex.toString());
+            System.out.print( "[ EN ] UIMAException: " + ex.toString() );
             ex.printStackTrace();
         } catch ( IOException ex ) {
-            System.out.print("[ EN ] IOException: " + ex.toString());
+            System.out.print( "[ EN ] IOException: " + ex.toString() );
             ex.printStackTrace();
         }
     }
