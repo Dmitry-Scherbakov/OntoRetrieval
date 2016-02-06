@@ -1,60 +1,79 @@
 package com.ontological.retrieval.Utilities;
 
+import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
+import org.apache.uima.cas.CASException;
+import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.JCasRegistry;
+import org.apache.uima.jcas.cas.TOP_Type;
+import org.apache.uima.jcas.tcas.Annotation;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Dmitry Scherbakov
- * @email dm.scherbakov@yandex.ru
+ * @email  dm.scherbakov@yandex.ru
  */
-public class Triplet {
-    private String m_Subject;
-    private String m_Object;
+public class Triplet extends Annotation
+{
+    @SuppressWarnings ("hiding")
+    public final static int typeIndexID = JCasRegistry.register( Triplet.class );
+
+    @SuppressWarnings ("hiding")
+    public final static int type = typeIndexID;
+    @Override
+    public int getTypeIndexID() {
+        return typeIndexID;
+    }
+
+    private Token m_Subject;
+    private Token m_Object;
     private String m_Relation;
-
-    //
-    // preposition type { 'in', 'of', 'for' }
-    private String m_SubjectContext;
-    private String m_ObjectContext;
-
-    private String m_FullContext;
 
     private List<String> m_SubjectAttrs;
     private List<String> m_ObjectAttrs;
 
+    private String m_FullContext;
+
     private TripletScore m_Score;
 
-    @Deprecated
-    public Triplet( EntityWrapper obj, EntityWrapper subj, String relation ) {
-        m_Object = obj.getEntity();
-        m_Subject = subj.getEntity();
-        m_Relation = relation;
-        addObjectAttrs( obj.getAttributes() );
-        addSubjectAttrs( subj.getAttributes() );
-    }
-    public Triplet( String fullContext ) {
-        m_FullContext = fullContext;
-        m_ObjectAttrs = new ArrayList<String>();
-        m_SubjectAttrs = new ArrayList<String>();
+    protected Triplet(){}
+
+    public Triplet( int addr, TOP_Type type ) {
+        super(addr, type);
+        readObject();
     }
 
-    public void setObject( String obj ) {
+    public Triplet( JCas jcas ) {
+        super(jcas);
+        readObject();
+    }
+
+    public Triplet( JCas jcas, int begin, int end ) {
+        super(jcas);
+        setBegin(begin);
+        setEnd(end);
+        readObject();
+    }
+
+    private void readObject() {/*default - does nothing empty block */}
+
+    public Triplet( JCas jCas, String fullContext )
+    {
+        super( jCas );
+        m_ObjectAttrs = new ArrayList<String>();
+        m_SubjectAttrs = new ArrayList<String>();
+        m_FullContext = fullContext;
+    }
+
+    public void setObject( Token obj ) {
         m_Object = obj;
     }
-    public void setSubject( String subj ) {
+    public void setSubject( Token subj ) {
         m_Subject = subj;
     }
     public void setRelation( String relation ) {
         m_Relation = relation;
-    }
-    public void setFullContext( String context ) {
-        m_FullContext = context;
-    }
-    public void setSubjectContext( String context ) {
-        m_SubjectContext = context;
-    }
-    public void setObjectContext( String context ) {
-        m_ObjectContext = context;
     }
     public void setScore( TripletScore score ) {
         m_Score = score;
@@ -83,92 +102,50 @@ public class Triplet {
         }
         m_SubjectAttrs.add( attr );
     }
-    public String getObject() {
+    public Token getObject() {
         return m_Object;
     }
-    public String getSubject() {
+    public Token getSubject() {
         return m_Subject;
     }
     public String getRelation() {
         return m_Relation;
-    }
-    public String getFullContext() {
-        return m_FullContext;
     }
     public TripletScore getScore() {
         return m_Score;
     }
 
     public boolean isObject() {
-        return m_Object != null && !m_Object.isEmpty();
+        return m_Object != null && !m_Object.getCoveredText().isEmpty();
     }
     public boolean isSubject() {
-        return m_Subject != null && !m_Subject.isEmpty();
+        return m_Subject != null && !m_Subject.getCoveredText().isEmpty();
     }
     public boolean isRelation() {
         return m_Relation != null && !m_Relation.isEmpty();
     }
 
     public boolean isValid() {
-        return m_Object != null && m_Subject != null && m_Relation != null && !m_Object.isEmpty() && !m_Subject.isEmpty() && !m_Relation.isEmpty();
+        return isObject() && isObject() && isRelation();
     }
     public Triplet clone() {
-        Triplet cl = new Triplet( m_FullContext );
+        Triplet cl = null;
+        try {
+            cl = new Triplet( getCAS().getJCas(), m_FullContext );
+        } catch ( CASException ex ) {
+            cl = new Triplet();
+            cl.m_FullContext = m_FullContext;
+        }
         cl.setObject( m_Object );
         cl.setSubject( m_Subject );
         cl.setRelation( m_Relation );
         cl.addObjectAttrs( m_ObjectAttrs );
         cl.addSubjectAttrs( m_SubjectAttrs );
+        cl.setScore( m_Score );
         return cl;
     }
-    // aux
-    public void print() {
-        //
-        // Only for debug
-        //
-        String objAttr = "";
-        for ( String s : m_ObjectAttrs ) {
-            objAttr = objAttr + " /" + s;
-        }
-        String sbjAttr = "";
-        for ( String s : m_SubjectAttrs ) {
-            sbjAttr = sbjAttr + " /" + s;
-        }
-        String result = "< " + m_Subject + " > ";
-        if ( !sbjAttr.isEmpty() ) {
-            result += "{ " + sbjAttr + " }";
-        }
-        if ( !m_SubjectContext.isEmpty() ) {
-            result += "$" + m_SubjectContext;
-        }
-
-        result += " :" + m_Relation + " < " + m_Object + " > ";
-        if ( !objAttr.isEmpty() ) {
-            result += "{ " + objAttr + " }";
-        }
-        if ( !m_ObjectContext.isEmpty() ) {
-            result += "$" + m_ObjectContext;
-        }
-        System.out.println( "[ TRIPLET ]: " + result );
-    }
     public void printShort() {
-        System.out.printf( "[ short_triplet ] < %s > :%s < %s >\n", m_Subject, m_Relation, m_Object );
-    }
-
-    @Deprecated
-    static public class EntityWrapper {
-        private List<String> m_Attributes;
-        private String m_Entity;
-        public EntityWrapper( String entity, List<String> attributes ) {
-            m_Entity = entity;
-            m_Attributes = attributes;
-        }
-        public String getEntity() {
-            return m_Entity;
-        }
-        public List<String> getAttributes() {
-            return m_Attributes;
-        }
-
+        System.out.printf( "[ short_triplet ] < %s > :%s < %s >\n", m_Subject == null ? "" : m_Subject.getCoveredText(),
+                m_Relation, m_Object == null ? "" : m_Object.getCoveredText() );
     }
 }

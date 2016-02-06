@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <name>OntoRetrieval</name>
+    <description/>
+    <version>1.0</version>
+    <types>
+        <typeDescription>
+            <name>com.ontological.retrieval.Utilities.TripletScore</name>
+            <description>None</description>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>scoreValue</name>
+                    <rangeTypeName>uima.cas.Double</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>mainPointsCount</name>
+                    <rangeTypeName>uima.cas.Integer</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>com.ontological.retrieval.Utilities.Triplet</name>
+            <description>The fact structure. It is an analog of RDF triplet, but a little more.</description>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>subject</name>
+                    <description>Subject of a triplet.</description>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>object</name>
+                    <description>Object of a triplet.</description>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>relation</name>
+                    <description>Relation of a triplet.</description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>isRelation</name>
+                    <description>Is relation of a triplet.</description>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>isSubject</name>
+                    <description>Is subject of a triplet.</description>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>isObject</name>
+                    <description>Is object of a triplet.</description>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>isValid</name>
+                    <description>Is valid of a triplet.</description>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>clone</name>
+                    <description>Clone a triplet.</description>
+                    <rangeTypeName>com.ontological.retrieval.Utilities.Triplet</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>score</name>
+                    <description>Score of a triplet.</description>
+                    <rangeTypeName>com.ontological.retrieval.Utilities.TripletScore</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+    </types>
+</typeSystemDescription>
