@@ -1,6 +1,7 @@
-src/target/
-target/
-src/scripts/
 .idea
-results/
 dkpro/
+src/target/
+src/scripts/
+src/com/resources/
+results/
+target/
