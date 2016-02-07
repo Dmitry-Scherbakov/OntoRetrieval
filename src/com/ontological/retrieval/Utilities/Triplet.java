@@ -26,14 +26,17 @@ public class Triplet extends Annotation
         return typeIndexID;
     }
 
+    private Token m_SubjectCoref;
     private Token m_Subject;
+
+    private Token m_ObjectCoref;
     private Token m_Object;
     private String m_Relation;
 
     private List<String> m_SubjectAttrs;
     private List<String> m_ObjectAttrs;
 
-    private String m_FullContext;
+    private String m_Context;
 
     private TripletScore m_Score;
 
@@ -41,33 +44,23 @@ public class Triplet extends Annotation
 
     public Triplet( int addr, TOP_Type type ) {
         super(addr, type);
-        readObject();
     }
 
-    public Triplet( JCas jcas ) {
-        super(jcas);
-        readObject();
-    }
-
-    public Triplet( JCas jcas, int begin, int end ) {
-        super(jcas);
-        setBegin(begin);
-        setEnd(end);
-        readObject();
-    }
-
-    private void readObject() {/*default - does nothing empty block */}
-
-    public Triplet( JCas jCas, String fullContext )
-    {
+    public Triplet( JCas jCas, int begin, int end, String context ) {
         super( jCas );
-        m_ObjectAttrs = new ArrayList<String>();
-        m_SubjectAttrs = new ArrayList<String>();
-        m_FullContext = fullContext;
+        setBegin( begin );
+        setEnd( end );
+        m_Context = context;
     }
 
+    public void setObjectCoref( Token coref ) {
+        m_ObjectCoref = coref;
+    }
     public void setObject( Token obj ) {
         m_Object = obj;
+    }
+    public void setSubjectCoref( Token coref ) {
+        m_SubjectCoref = coref;
     }
     public void setSubject( Token subj ) {
         m_Subject = subj;
@@ -102,8 +95,14 @@ public class Triplet extends Annotation
         }
         m_SubjectAttrs.add( attr );
     }
+    public Token getObjectCoref() {
+        return m_ObjectCoref;
+    }
     public Token getObject() {
         return m_Object;
+    }
+    public Token getSubjectCoref() {
+        return m_SubjectCoref;
     }
     public Token getSubject() {
         return m_Subject;
@@ -129,12 +128,14 @@ public class Triplet extends Annotation
         return isObject() && isObject() && isRelation();
     }
     public Triplet clone() {
-        Triplet cl = null;
+        Triplet cl;
         try {
-            cl = new Triplet( getCAS().getJCas(), m_FullContext );
+            cl = new Triplet( getCAS().getJCas(), getBegin(), getEnd(), m_Context );
         } catch ( CASException ex ) {
             cl = new Triplet();
-            cl.m_FullContext = m_FullContext;
+            cl.m_Context = m_Context;
+            cl.setBegin( getBegin() );
+            cl.setEnd( getEnd() );
         }
         cl.setObject( m_Object );
         cl.setSubject( m_Subject );
@@ -147,5 +148,11 @@ public class Triplet extends Annotation
     public void printShort() {
         System.out.printf( "[ short_triplet ] < %s > :%s < %s >\n", m_Subject == null ? "" : m_Subject.getCoveredText(),
                 m_Relation, m_Object == null ? "" : m_Object.getCoveredText() );
+    }
+    public void printShortCoref() {
+        System.out.printf( "[ short_coref_triplet ] < %s > :%s < %s >\n",
+                m_SubjectCoref == null ? ( isSubject() ? m_Subject.getCoveredText() : "" ) : "coref$" + m_SubjectCoref.getCoveredText(),
+                m_Relation,
+                m_ObjectCoref == null ? ( isObject() ? m_Object.getCoveredText() : "" ) : "coref$" + m_ObjectCoref.getCoveredText() );
     }
 }

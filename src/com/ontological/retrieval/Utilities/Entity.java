@@ -1,9 +1,5 @@
 package com.ontological.retrieval.Utilities;
 
-/**
- * Created by Administrator on 06.02.2016.
- */
-
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 
 import java.util.ArrayList;

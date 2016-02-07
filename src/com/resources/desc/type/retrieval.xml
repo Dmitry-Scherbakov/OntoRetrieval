@@ -69,6 +69,16 @@
                     <description>Score of a triplet.</description>
                     <rangeTypeName>com.ontological.retrieval.Utilities.TripletScore</rangeTypeName>
                 </featureDescription>
+                <featureDescription>
+                    <name>subjectCoreference</name>
+                    <description>Coreference of a subject within a triplet.</description>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>objectCoreference</name>
+                    <description>Coreference of a object within a triplet.</description>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</rangeTypeName>
+                </featureDescription>
             </features>
         </typeDescription>
     </types>
