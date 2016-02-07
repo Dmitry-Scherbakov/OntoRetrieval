@@ -15,7 +15,6 @@ public class GenerateGraph
     //
     // The results could be visualized on the site http://console.neo4j.org/
     // For that use Cypher syntax.
-    //
     public static String generateSentenceGraph(List<Entity> entitiesIndex )
     {
         String sentenceGraph = new String();

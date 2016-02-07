@@ -7,10 +7,12 @@ import org.apache.uima.jcas.tcas.Annotation;
 
 /**
  * @author Dmitry Scherbakov
- * @email dm.scherbakov@yandex.ru
+ * @email  dm.scherbakov@yandex.ru
  */
 public class TripletScore extends Annotation
 {
+    public static final int MAXIMUM_AUTHORITY_BOUND = 40;
+
     private static final int SENTENCE_SIZE_LOW_BOUND = 5;
     private static final int SENTENCE_SIZE_MIDDLE_BOUND = 9;
     private static final int SENTENCE_SIZE_HIGHEST_BOUND = 18;
@@ -32,16 +34,6 @@ public class TripletScore extends Annotation
 
     public TripletScore( int addr, TOP_Type type ) {
         super( addr, type );
-    }
-
-    public TripletScore( JCas jcas ) {
-        super( jcas );
-    }
-
-    public TripletScore( JCas jcas, int begin, int end ) {
-        super(jcas);
-        setBegin(begin);
-        setEnd(end);
     }
 
     public TripletScore( JCas jCas, int sentenceSize, int undeterminedRelationsCount, int mainPointsCount )

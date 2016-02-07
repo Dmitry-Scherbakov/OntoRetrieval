@@ -25,7 +25,7 @@ public class TripletScore_Type extends Annotation_Type
                 public FeatureStructure createFS( int addr, CASImpl cas ) {
                     if ( TripletScore_Type.this.useExistingInstance ) {
                         FeatureStructure fs = TripletScore_Type.this.jcas.getJfsFromCaddr( addr );
-                        if ( null == fs ) {
+                        if ( fs == null ) {
                             fs = new Triplet( addr, TripletScore_Type.this );
                             TripletScore_Type.this.jcas.putJfsFromCaddr( addr, fs );
                         }

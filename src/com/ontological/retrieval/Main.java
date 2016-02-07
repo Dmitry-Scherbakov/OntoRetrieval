@@ -17,10 +17,7 @@ public class Main {
 
     private static String DOCUMENT_PATH = "docs/walt-disney-ru.txt";
 
-    public static void main(String[] args) throws Exception {
-
-        System.out.println( "Start" );
-
+    public static void main( String[] args ) throws Exception {
         boolean isRussian = false;
         if ( isRussian ) {
             parseRussian( "docs/walt-disney-ru.txt" );
@@ -37,10 +34,8 @@ public class Main {
                     TextReader.PARAM_LANGUAGE, "en" );
 
             runPipeline( readerDescription,
-                    //createEngineDescription(LanguageToolLemmatizer.class),
                     createEngineDescription( StanfordSegmenter.class ),
                     createEngineDescription( StanfordPosTagger.class ),
-                    //createEngineDescription(TreeTaggerPosTagger.class),
                     createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                     createEngineDescription( StanfordCoreferenceResolver.class ),
                     createEngineDescription( StanfordNamedEntityRecognizer.class ),
