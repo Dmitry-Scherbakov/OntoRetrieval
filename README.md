@@ -3,7 +3,7 @@
 ##Introduction
 
 The purpose of this project is to extract facts/triplets from unstructured data (text) and to model the graph based on the retrieval triplets and a set of the applicable algorithms for extracted data. This data structure is very similar to our real world, where almost each entity is connected to another entity(s). The connections (relations) between the entities are also very important information: it could be used for building 'grammar' to manipulate/search by/through such data structure.
-On the top level, the representation of all entities will have ontological format (e.g., entity 'Moscow' has ontological format like </en/.../settlement/city/Moscow>). This format has a wide range of usage: unique entity identification, modeling flexible metrics for data manipulation, automatic machine translation and so on.
+On the top level, the representation of all entities will have ontological format (e.g., entity 'Moscow' has ontological format like \</en/.../settlement/city/Moscow\>). This format has a wide range of usage: unique entity identification, modeling flexible metrics for data manipulation, automatic machine translation and so on.
 
 ##Dependent packages
 
