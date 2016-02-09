@@ -7,7 +7,7 @@ On the top level, the representation of all entities will have ontological forma
 
 ##Dependent packages
 
-To build this, you need to download [https://dkpro.github.io/](DKpro).
+To build this, you need to download [DKpro](https://dkpro.github.io/).
  
 ##Limitations
 
