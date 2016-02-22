@@ -20,12 +20,24 @@ import java.util.List;
 
 /**
  * @note   It is strongly recommended to use this extractor with the chain of StandfordParser
- *         which need to parametize by StanfordParser.DependenciesMode.TREE.
+ *         which need to parametrize by StanfordParser.DependenciesMode.TREE.
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */
 public class TripletsExtractor extends JCasConsumer_ImplBase
 {
+    public static enum TripletValidationFactor
+    {
+        ALL,
+        ONLY_VALID,
+        MAXIMUM_AUTHORITY,
+        MAXIMUM_AUTHORITY_AND_VALID
+    }
+
+    public static final String PARAM_FACTOR = "factor";
+    @ConfigurationParameter(name = PARAM_FACTOR, mandatory = false, defaultValue = "ALL")
+    protected TripletValidationFactor factor;
+
     public static final String PARAM_SINGLETON = "singleton";
     @ConfigurationParameter(name = PARAM_SINGLETON, defaultValue = "true", mandatory = true)
     private boolean singleton;
@@ -103,7 +115,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
                         triplet.setRelation( relation );
                     }
                 }
-                if ( triplet != null ) {
+                if ( isTripletCorrect( triplet, forwardScore ) ) {
                     resolveCoreference( aJCas, triplet, corefLinks, prevSentence );
                     forwardScore.setBegin( sentence.getBegin() );
                     forwardScore.setEnd( sentence.getEnd() );
@@ -131,6 +143,26 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 //                tr.printShortCoref();
 //            }
 //        }
+    }
+
+    private boolean isTripletCorrect( Triplet triplet, TripletScore score )
+    {
+        if ( triplet == null ) {
+            return false;
+        }
+        switch ( factor )
+        {
+            case ALL:
+                return true;
+            case ONLY_VALID:
+                return triplet.isValid();
+            case MAXIMUM_AUTHORITY:
+                return score.getScoreValue() <= TripletScore.MAXIMUM_AUTHORITY_BOUND;
+            case MAXIMUM_AUTHORITY_AND_VALID:
+                return score.getScoreValue() <= TripletScore.MAXIMUM_AUTHORITY_BOUND && triplet.isValid();
+            default:
+                return false;
+        }
     }
 
     private void cacheCoreferenceLink( JCas aJCas, Sentence sentence, HashMap<Integer,CoreferenceLink> corefLinks )
@@ -164,7 +196,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             }
         }
 
-        if ( triplet.isSubject() && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
+        if ( triplet.isSubject() && triplet.getSubjectCoref() == null && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
             List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
             if ( tripletsList != null && tripletsList.size() == 1 ) {
                 Triplet donorTriplet = tripletsList.get( 0 );
