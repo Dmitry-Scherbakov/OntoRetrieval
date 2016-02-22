@@ -10,7 +10,7 @@ import org.springframework.util.DigestUtils;
 public class Utils
 {
     public static String TokenHash( Token tk ) {
-        if ( tk.getLemma() == null || tk.getLemma().getValue().isEmpty() ) {
+        if ( tk == null || tk.getLemma() == null || tk.getLemma().getValue().isEmpty() ) {
             return Constants.INVALID_HASH;
         }
         return DigestUtils.md5DigestAsHex( tk.getLemma().getValue().getBytes() );
