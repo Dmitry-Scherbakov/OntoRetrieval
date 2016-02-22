@@ -52,6 +52,12 @@ public class Triplet_Type extends Annotation_Type
     final Feature object_f;
     final int object_code;
 
+    final Feature objectId_f;
+    final int objectId_code;
+
+    final Feature subjectId_f;
+    final int subjectId_code;
+
     final Feature relation_f;
     final int relation_code;
 
@@ -169,6 +175,22 @@ public class Triplet_Type extends Annotation_Type
         ll_cas.ll_setRefValue( addr, relation_code, v );
     }
 
+    public int getSubjectId( int addr )
+    {
+        if ( featOkTst && subjectId_f == null ) {
+            jcas.throwFeatMissing( "subjectId", "uima.cas.String" );
+        }
+        return ll_cas.ll_getRefValue( addr, subjectId_code );
+    }
+
+    public int getObjectId( int addr )
+    {
+        if ( featOkTst && objectId_f == null ) {
+            jcas.throwFeatMissing( "objectId", "uima.cas.String" );
+        }
+        return ll_cas.ll_getRefValue( addr, objectId_code );
+    }
+
     public int isSubject( int addr )
     {
         if ( featOkTst && isSubject_f == null ) {
@@ -220,11 +242,17 @@ public class Triplet_Type extends Annotation_Type
         subject_f = jcas.getRequiredFeatureDE(casType, "subject", "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token", featOkTst);
         subject_code  = (null == subject_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)subject_f).getCode();
 
+        subjectId_f = jcas.getRequiredFeatureDE(casType, "subjectId", "uima.cas.String", featOkTst);
+        subjectId_code  = (null == subjectId_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)subjectId_f).getCode();
+
         objectCoref_f = jcas.getRequiredFeatureDE(casType, "objectCoreference", "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token", featOkTst);
         objectCoref_code  = (null == objectCoref_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)objectCoref_f).getCode();
 
         object_f = jcas.getRequiredFeatureDE(casType, "object", "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token", featOkTst);
         object_code  = (null == object_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)object_f).getCode();
+
+        objectId_f = jcas.getRequiredFeatureDE(casType, "objectId", "uima.cas.String", featOkTst);
+        objectId_code  = (null == objectId_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)objectId_f).getCode();
 
         relation_f = jcas.getRequiredFeatureDE(casType, "relation", "uima.cas.String", featOkTst);
         relation_code  = (null == relation_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)relation_f).getCode();

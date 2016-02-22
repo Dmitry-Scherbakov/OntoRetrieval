@@ -30,9 +30,19 @@
                     <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</rangeTypeName>
                 </featureDescription>
                 <featureDescription>
+                    <name>subjectId</name>
+                    <description>Subject id.</description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
                     <name>object</name>
                     <description>Object of a triplet.</description>
                     <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>objectId</name>
+                    <description>Object id.</description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
                 <featureDescription>
                     <name>relation</name>

@@ -6,6 +6,12 @@ import org.apache.uima.jcas.cas.TOP_Type;
 import org.apache.uima.jcas.tcas.Annotation;
 
 /**
+ * @todo
+ *      In case DKpro transfer edu.stanford.nlp.trees.DependencyScoring data-type,
+ *      need to add this factor to calculate score of a triplet.
+ */
+
+/**
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov@yandex.ru
  */
