@@ -28,9 +28,34 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 {
     public static enum TripletValidationFactor
     {
+        /**
+         * Save all extracted triplets. This case could be used for retrieval extended
+         * information from the parsed data. Some of triplets could be not completed, e.g.
+         * which have not some of mandatory fields (subject/relation/object), or could be
+         * extracted from very difficult semantic tree, as a result such triplets will have
+         * very low 'structured authority' (very big TripletScore.value).
+         */
         ALL,
+        /**
+         * This case will save almost all triplets except one type: if a triplet is not valid
+         * (has not at least one of mandatory field: subject or relation or object), it will
+         * not be saved. This case is also will save the triplets which have very low 'structured
+         * authority' as well as TripletValidationFactor.ALL.
+         */
         ONLY_VALID,
+        /**
+         * This case will save all triplets, which has TripletsScore.value less then
+         * TripletScore.MAXIMUM_AUTHORITY_BOUND threshold. So, invalid triplets (which could not
+         * have some of mandatory fields) are also will be saved in case of TripletsScore.value
+         * will be less then TripletScore.MAXIMUM_AUTHORITY_BOUND threshold as well.
+         */
         MAXIMUM_AUTHORITY,
+        /**
+         * This case will save the most 'structured authority' and well formed triplets. It means
+         * the only triplets which have TripletsScore.value less then TripletScore.MAXIMUM_AUTHORITY_BOUND
+         * threshold AND 'valid' formed (have all mandatory fields: subject and relation and object)
+         * will be saved.
+         */
         MAXIMUM_AUTHORITY_AND_VALID
     }
 
@@ -132,6 +157,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             // Create scripts for modeling sentence graph for Neo4j. It is for debug purpose.
 //            scripts.add( GenerateGraph.generateSentenceGraph( entitiesIndex ) );
 //            for ( String script : scripts ) {
+//                System.out.println ( sentence.getCoveredText() );
 //                System.out.println( script );
 //            }
         }
@@ -238,7 +264,6 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
     //       Move to utils.
     //
     private List<Entity> parseForGraph( JCas aJCas, Sentence sentence ) {
-        System.out.println("\n[ Sentence ] : " + sentence.getCoveredText());
         List<Entity> entities = new ArrayList<>();
         for ( Dependency dep : JCasUtil.selectCovered(aJCas, Dependency.class, sentence) ) {
 

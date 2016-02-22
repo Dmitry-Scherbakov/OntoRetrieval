@@ -5,6 +5,7 @@ import static org.apache.uima.fit.factory.CollectionReaderFactory.createReaderDe
 import static org.apache.uima.fit.pipeline.SimplePipeline.runPipeline;
 
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
+import de.tudarmstadt.ukp.dkpro.core.maltparser.MaltParser;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.*;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.treetagger.TreeTaggerPosTagger;
@@ -59,10 +60,10 @@ public class Main {
                     createEngineDescription( BreakIteratorSegmenter.class ),
                     createEngineDescription( TreeTaggerPosTagger.class ) );
         } catch ( UIMAException ex ) {
-            System.out.print( "[ EN ] UIMAException: " + ex.toString() );
+            System.out.print( "[ RUS ] UIMAException: " + ex.toString() );
             ex.printStackTrace();
         } catch ( IOException ex ) {
-            System.out.print( "[ EN ] IOException: " + ex.toString() );
+            System.out.print( "[ RUS ] IOException: " + ex.toString() );
             ex.printStackTrace();
         }
     }
