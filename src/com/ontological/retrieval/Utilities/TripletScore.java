@@ -11,11 +11,11 @@ import org.apache.uima.jcas.tcas.Annotation;
  */
 public class TripletScore extends Annotation
 {
-    public static final int MAXIMUM_AUTHORITY_BOUND = 40;
+    public static final int MAXIMUM_AUTHORITY_BOUND = 50;
 
-    private static final int SENTENCE_SIZE_LOW_BOUND = 5;
-    private static final int SENTENCE_SIZE_MIDDLE_BOUND = 9;
-    private static final int SENTENCE_SIZE_HIGHEST_BOUND = 18;
+    private static final int SENTENCE_SIZE_LOW_BOUND = 7;
+    private static final int SENTENCE_SIZE_MIDDLE_BOUND = 13;
+    private static final int SENTENCE_SIZE_HIGHEST_BOUND = 25;
 
     public final static int typeIndexID = JCasRegistry.register( TripletScore.class );
 
@@ -66,13 +66,16 @@ public class TripletScore extends Annotation
             // The huge size of sentence. It is a headache for parsing such semantic.
             score = 8.0;
         }
+
+        double relationViolationDeg = 1;
         //
-        // Calculate the impact of sentence difficulty based on the subjects/key_points/main_points
-        // within the scope of this sentence.
-        score = score * mainPointsCount;
-        //
-        // Calculate the impact of undetermined relations between the nodes/words.
-        score = score * ( ( 1 + ( undeterminedRelationsCount / sentenceSize ) ) * 10 );
-        return score;
+        // relationViolationDeg = UpperRound{ 100 * | ln( u / sz ) | ^ (-e) }; u != 0;
+        if ( undeterminedRelationsCount > 0 ) {
+            relationViolationDeg = 100 * Math.pow( Math.abs( Math.log( (double) undeterminedRelationsCount / (double) sentenceSize )), -Math.E );
+            if ( relationViolationDeg < 1.0 ) {
+                relationViolationDeg = 1;
+            }
+        }
+        return score * mainPointsCount * relationViolationDeg;
     }
 }

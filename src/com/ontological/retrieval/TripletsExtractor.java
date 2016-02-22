@@ -120,6 +120,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             // Create scripts for modeling sentence graph for Neo4j. It is for debug purpose.
 //            scripts.add( GenerateGraph.generateSentenceGraph( entitiesIndex ) );
 //            for ( String script : scripts ) {
+//                System.out.println ( sentence.getCoveredText() );
 //                System.out.println( script );
 //            }
         }
@@ -206,7 +207,6 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
     //       Move to utils.
     //
     private List<Entity> parseForGraph( JCas aJCas, Sentence sentence ) {
-        System.out.println("\n[ Sentence ] : " + sentence.getCoveredText());
         List<Entity> entities = new ArrayList<>();
         for ( Dependency dep : JCasUtil.selectCovered(aJCas, Dependency.class, sentence) ) {
 
