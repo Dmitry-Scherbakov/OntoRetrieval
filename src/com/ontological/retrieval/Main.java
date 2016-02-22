@@ -37,10 +37,11 @@ public class Main {
             runPipeline( readerDescription,
                     createEngineDescription( StanfordSegmenter.class ),
                     createEngineDescription( StanfordPosTagger.class ),
+                    createEngineDescription( StanfordLemmatizer.class ),
                     createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                     createEngineDescription( StanfordCoreferenceResolver.class ),
                     createEngineDescription( StanfordNamedEntityRecognizer.class ),
-                    createEngineDescription( TripletsExtractor.class ) );
+                    createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ALL ) );
         } catch ( UIMAException ex ) {
             System.out.print("[ EN ] UIMAException: " + ex.toString());
             ex.printStackTrace();

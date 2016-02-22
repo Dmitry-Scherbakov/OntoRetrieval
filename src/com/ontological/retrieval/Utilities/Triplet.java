@@ -11,6 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @todo
+ *      Join some fields to a single data structure. E.g.:
+ *      - [m_SubjectCoref|m_Subject|m_SubjectAttrs] to a class TripletSubject
+ *      - [m_ObjectCoref|m_Object|m_ObjectAttrs] to a class TripletObject
+ *
+ * @note
+ *      The most probably, 'relation' field also will be extended to
+ *      a class TripletRelation, which will have extended information.
+ */
+
+/**
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov@yandex.ru
  */
@@ -25,6 +36,9 @@ public class Triplet extends Annotation
     public int getTypeIndexID() {
         return typeIndexID;
     }
+
+    private String m_SubjectId;
+    private String m_ObjectId;
 
     private Token m_SubjectCoref;
     private Token m_Subject;
@@ -43,7 +57,7 @@ public class Triplet extends Annotation
     protected Triplet(){}
 
     public Triplet( int addr, TOP_Type type ) {
-        super(addr, type);
+        super( addr, type );
     }
 
     public Triplet( JCas jCas, int begin, int end, String context ) {
@@ -55,15 +69,23 @@ public class Triplet extends Annotation
 
     public void setObjectCoref( Token coref ) {
         m_ObjectCoref = coref;
+        m_ObjectId = Utils.TokenHash( m_ObjectCoref );
     }
     public void setObject( Token obj ) {
         m_Object = obj;
+        if ( m_ObjectCoref == null ) {
+            m_ObjectId = Utils.TokenHash( m_Object );
+        }
     }
     public void setSubjectCoref( Token coref ) {
         m_SubjectCoref = coref;
+        m_SubjectId = Utils.TokenHash( m_SubjectCoref );
     }
     public void setSubject( Token subj ) {
         m_Subject = subj;
+        if ( m_SubjectCoref == null ) {
+            m_SubjectId = Utils.TokenHash( m_Subject );
+        }
     }
     public void setRelation( String relation ) {
         m_Relation = relation;
@@ -113,6 +135,12 @@ public class Triplet extends Annotation
     public TripletScore getScore() {
         return m_Score;
     }
+    public String getSubjectId() {
+        return m_SubjectId;
+    }
+    public String getObjectId() {
+        return m_ObjectId;
+    }
 
     public boolean isObject() {
         return m_Object != null && !m_Object.getCoveredText().isEmpty();
@@ -127,6 +155,12 @@ public class Triplet extends Annotation
     public boolean isValid() {
         return isObject() && isObject() && isRelation();
     }
+
+    /**
+     * @todo
+     *      Need to think about optimized clone function. Current implementation
+     *      is very dirty.
+     */
     public Triplet clone() {
         Triplet cl;
         try {

@@ -162,12 +162,15 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 //            }
         }
 //        System.out.println( "==================" );
+//        List<Triplet> trForGraph = new ArrayList<>();
 //        for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
-//            System.out.println( "[ SENT ] " + sentence.getCoveredText() );
+//            System.out.println( "\n[ SENT ] " + sentence.getCoveredText() );
 //            for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
+//                trForGraph.add( tr );
 //                tr.printShortCoref();
 //            }
 //        }
+//        System.out.printf( "[ GRAPH SCRIPT ]:\n%s\n", GenerateGraph.generateTripletsGraph( trForGraph ) );
     }
 
     private boolean isTripletCorrect( Triplet triplet, TripletScore score )
@@ -193,6 +196,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
     private void cacheCoreferenceLink( JCas aJCas, Sentence sentence, HashMap<Integer,CoreferenceLink> corefLinks )
     {
         for ( CoreferenceLink link : JCasUtil.selectCovered( aJCas, CoreferenceLink.class, sentence ) ) {
+//            debugCoreference( sentence, link );
             if ( link.getReferenceType().equals( "PRONOMINAL" ) ) {
                 if ( link.getNext() != null && !corefLinks.containsKey( link.getNext().getBegin() ) ) {
                     corefLinks.put( link.getNext().getBegin(), link );
@@ -222,6 +226,11 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
         }
 
         if ( triplet.isSubject() && triplet.getSubjectCoref() == null && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
+            //
+            // Pronoun 'that' must be searched within current sentence.
+            // @todo
+            //      Implement 'that' substitution in future.
+            //
             List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
             if ( tripletsList != null && tripletsList.size() == 1 ) {
                 Triplet donorTriplet = tripletsList.get( 0 );
@@ -313,5 +322,19 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             }
         }
         return null;
+    }
+
+    private void debugCoreference( Sentence sentence, CoreferenceLink link ) {
+        System.out.println( "\n[ Coref sentence ]: " + sentence.getCoveredText() );
+        System.out.printf( "[ Coref cur text ]: %s.\n", link.getCoveredText() );
+        System.out.printf( "[ Coref cur data ]: pos[%d-%d], ReferenceType[%s], ReferenceRelation[%s], Address[%d].\n",
+                link.getBegin(), link.getEnd(), link.getReferenceType(), link.getReferenceRelation(), link.getAddress());
+        CoreferenceLink next = link.getNext();
+        while ( next != null ) {
+            System.out.printf( "[ Coref next text ]: %s.\n", next.getCoveredText() );
+            System.out.printf( "[ Coref next data ]: pos[%d-%d], ReferenceType[%s], ReferenceRelation[%s], Address[%d].\n",
+                    next.getBegin(), next.getEnd(), next.getReferenceType(), next.getReferenceRelation(), next.getAddress());
+            next = next.getNext();
+        }
     }
 }
