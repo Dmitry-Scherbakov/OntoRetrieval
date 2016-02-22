@@ -86,6 +86,7 @@ public class Triplet extends Annotation
         if ( m_SubjectCoref == null ) {
             m_SubjectId = Utils.TokenHash( m_Subject );
         }
+
     }
     public void setRelation( String relation ) {
         m_Relation = relation;
@@ -153,7 +154,7 @@ public class Triplet extends Annotation
     }
 
     public boolean isValid() {
-        return isObject() && isObject() && isRelation();
+        return isObject() && isSubject() && isRelation();
     }
 
     /**
@@ -174,19 +175,21 @@ public class Triplet extends Annotation
         cl.setObject( m_Object );
         cl.setSubject( m_Subject );
         cl.setRelation( m_Relation );
-        cl.addObjectAttrs( m_ObjectAttrs );
-        cl.addSubjectAttrs( m_SubjectAttrs );
+        if ( m_ObjectAttrs != null ) {
+            cl.addObjectAttrs( m_ObjectAttrs );
+        }
+        if ( m_SubjectAttrs != null ) {
+            cl.addSubjectAttrs( m_SubjectAttrs );
+        }
         cl.setScore( m_Score );
         return cl;
     }
-    public void printShort() {
-        System.out.printf( "[ short_triplet ] < %s > :%s < %s >\n", m_Subject == null ? "" : m_Subject.getCoveredText(),
-                m_Relation, m_Object == null ? "" : m_Object.getCoveredText() );
-    }
     public void printShortCoref() {
-        System.out.printf( "[ short_coref_triplet ] < %s > :%s < %s >\n",
-                m_SubjectCoref == null ? ( isSubject() ? m_Subject.getCoveredText() : "" ) : "coref$" + m_SubjectCoref.getCoveredText(),
-                m_Relation,
-                m_ObjectCoref == null ? ( isObject() ? m_Object.getCoveredText() : "" ) : "coref$" + m_ObjectCoref.getCoveredText() );
+        String sbj = m_SubjectCoref == null ? ( isSubject() ? m_Subject.getCoveredText() : "" ) : "coref$" + m_SubjectCoref.getCoveredText();
+        String obj = m_ObjectCoref == null ? ( isObject() ? m_Object.getCoveredText() : "" ) : "coref$" + m_ObjectCoref.getCoveredText();
+        String sbjPosVal = sbj.isEmpty() ? "" : (m_SubjectCoref == null ? m_Subject.getPos().getPosValue() : m_SubjectCoref.getPos().getPosValue());
+        String objPosVal = obj.isEmpty() ? "" : (m_ObjectCoref == null ? m_Object.getPos().getPosValue() : m_ObjectCoref.getPos().getPosValue());
+        System.out.printf( "[ short_coref_triplet ] < %s >/%s/ :%s < %s >/%s/\n",
+                sbj,sbjPosVal,m_Relation, obj, objPosVal);
     }
 }

@@ -7,6 +7,7 @@ import com.ontological.retrieval.Utilities.Triplet;
 import com.ontological.retrieval.Utilities.TripletScore;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
+import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.dependency.Dependency;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasConsumer_ImplBase;
@@ -84,6 +85,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 //        List<String> scripts = new ArrayList<>();
         HashMap<Integer,CoreferenceLink> corefLinks = new HashMap<>();
         Sentence prevSentence = null;
+        Triplet prevTr_InCurrSent = null;
         for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
             List<Entity> entitiesIndex = parseForGraph( aJCas, sentence );
             cacheCoreferenceLink( aJCas, sentence, corefLinks );
@@ -115,6 +117,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
                     }
                     triplet.setRelation( relation );
                 } else if( en.getType().equals( "NSUBJ" ) ) {
+
                     triplet = new Triplet( aJCas, sentence.getBegin(), sentence.getEnd(), sentence.getCoveredText() );
                     triplet.setSubject( en.getName() );
                     Entity dobjEntity = findEntityType( "DOBJ", en.getParent().getChildren() );
@@ -140,19 +143,25 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
                         triplet.setRelation( relation );
                     }
                 }
-                if ( isTripletCorrect( triplet, forwardScore ) ) {
-                    resolveCoreference( aJCas, triplet, corefLinks, prevSentence );
-                    forwardScore.setBegin( sentence.getBegin() );
-                    forwardScore.setEnd( sentence.getEnd() );
-                    triplet.setScore( forwardScore );
+                if ( triplet != null ) {
+                    resolveCoreference( aJCas, prevTr_InCurrSent, triplet, corefLinks, prevSentence );
+                    resolvePosCollisions( triplet );
                     triplets.add( triplet );
-                    triplet.addToIndexes( aJCas );
-                    //
+                    prevTr_InCurrSent = triplet;
+                    triplets.add( triplet );
+                    if ( isTripletCorrect( triplet, forwardScore ) ) {
+                        forwardScore.setBegin( sentence.getBegin() );
+                        forwardScore.setEnd( sentence.getEnd() );
+                        triplet.setScore( forwardScore );
+                        triplet.addToIndexes( aJCas );
+                    }
                     // There could be another sentence subject/main_point
                     triplet = null;
                 }
+
             }
             prevSentence = sentence;
+            prevTr_InCurrSent = null;
             //
             // Create scripts for modeling sentence graph for Neo4j. It is for debug purpose.
 //            scripts.add( GenerateGraph.generateSentenceGraph( entitiesIndex ) );
@@ -175,7 +184,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 
     private boolean isTripletCorrect( Triplet triplet, TripletScore score )
     {
-        if ( triplet == null ) {
+        if ( triplet == null || !triplet.isSubject() ) {
             return false;
         }
         switch ( factor )
@@ -207,7 +216,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
         }
     }
 
-    private void resolveCoreference( JCas aJCas, Triplet triplet, HashMap<Integer,CoreferenceLink> corefLinks, Sentence prevSentence )
+    private void resolveCoreference( JCas aJCas, Triplet prevTr_InCurrSent, Triplet triplet, HashMap<Integer,CoreferenceLink> corefLinks, Sentence prevSentence )
     {
         if ( triplet.isSubject() && corefLinks.containsKey( triplet.getSubject().getBegin() ) ) {
             CoreferenceLink corefEn = corefLinks.get( triplet.getSubject().getBegin() );
@@ -226,17 +235,27 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
         }
 
         if ( triplet.isSubject() && triplet.getSubjectCoref() == null && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
-            //
-            // Pronoun 'that' must be searched within current sentence.
-            // @todo
-            //      Implement 'that' substitution in future.
-            //
-            List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
-            if ( tripletsList != null && tripletsList.size() == 1 ) {
-                Triplet donorTriplet = tripletsList.get( 0 );
-                if ( donorTriplet.getScore().getScoreValue() < TripletScore.MAXIMUM_AUTHORITY_BOUND &&
-                        donorTriplet.getScore().getMainPointsCount() == 1 ) {
-                    triplet.setSubjectCoref( donorTriplet.getSubject() );
+            if ( Models.isPositionedPronoun( triplet.getSubject().getCoveredText() ) ) {
+                // Some pronouns should searched in a current sentence. The example
+                // of such pronoun is 'that'.
+                if ( prevTr_InCurrSent != null ) {
+                    if ( prevTr_InCurrSent.getSubjectCoref() != null ) {
+                        triplet.setSubjectCoref( prevTr_InCurrSent.getSubjectCoref() );
+                    } else {
+                        triplet.setSubjectCoref( prevTr_InCurrSent.getSubject() );
+                    }
+                }
+            } else {
+                List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
+                if ( tripletsList != null && tripletsList.size() > 0 ) {
+                    Triplet donorTriplet = tripletsList.get( tripletsList.size() - 1 );
+                    if ( donorTriplet.getScore().getMainPointsCount() <= 2 ) {
+                        if ( donorTriplet.getSubjectCoref() != null ) {
+                            triplet.setSubjectCoref( donorTriplet.getSubjectCoref() );
+                        } else {
+                            triplet.setSubjectCoref( donorTriplet.getSubject() );
+                        }
+                    }
                 }
             }
         }
@@ -335,6 +354,28 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             System.out.printf( "[ Coref next data ]: pos[%d-%d], ReferenceType[%s], ReferenceRelation[%s], Address[%d].\n",
                     next.getBegin(), next.getEnd(), next.getReferenceType(), next.getReferenceRelation(), next.getAddress());
             next = next.getNext();
+        }
+    }
+
+    private boolean isNoun( Token tk ) {
+        return ( tk.getPos().getPosValue().equals( "NN" ) ||
+                tk.getPos().getPosValue().equals( "NNS" ) ||
+                tk.getPos().getPosValue().equals( "NNP" ) ||
+                Models.isPronoun( tk.getCoveredText() ) );
+    }
+
+    private void resolvePosCollisions( Triplet triplet ) {
+        if ( triplet.getSubjectCoref() != null && !isNoun( triplet.getSubjectCoref() ) ) {
+            triplet.setSubjectCoref( null );
+        }
+        if ( triplet.getObjectCoref() != null && !isNoun( triplet.getObjectCoref() ) ) {
+            triplet.setObjectCoref( null );
+        }
+        if ( triplet.isObject() && !isNoun( triplet.getObject() ) ) {
+            triplet.setObject( null );
+        }
+        if ( triplet.isSubject() && !isNoun( triplet.getSubject() ) ) {
+            triplet.setSubject( null );
         }
     }
 }

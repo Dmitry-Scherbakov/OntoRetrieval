@@ -9,13 +9,16 @@ import java.util.*;
 /**
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
+ *
+ * @brief The results could be visualized on the site http://console.neo4j.org/
+ *        For that use Cypher syntax.
  */
 public class GenerateGraph
 {
     private GenerateGraph(){}
-    //
-    // The results could be visualized on the site http://console.neo4j.org/
-    // For that use Cypher syntax.
+    /**
+     * @brief Generate a script for modeling Sentence semantic structure
+     */
     public static String generateSentenceGraph(List<Entity> entitiesIndex )
     {
         String sentenceGraph = new String();
@@ -46,6 +49,9 @@ public class GenerateGraph
         return sentenceGraph;
     }
 
+    /**
+     * @brief Generate a script for modeling the full triplets connected structure.
+     */
     public static String generateTripletsGraph(List<Triplet> triplets )
     {
         String graph = "";
@@ -64,9 +70,9 @@ public class GenerateGraph
                 nodes.put( subjectId, getSubjectLemma( triplet ) );
             }
 
-            if ( triplet.isValid() && triplet.isRelation() ) {
-                String rel = String.format( "_%s-[:%s]->_%s", subjectId, triplet.getRelation(), objectId );
-                edges.add( rel );
+            if ( triplet.isValid() ) {
+                String rel = String.format("_%s-[:%s]->_%s", subjectId, triplet.getRelation(), objectId);
+                edges.add(rel);
             }
         }
         Iterator it = nodes.entrySet().iterator();
@@ -87,6 +93,11 @@ public class GenerateGraph
         return graph;
     }
 
+    /**
+     * @inner
+     * @todo
+     *      Move to utils or to a class TripletObject
+     */
     private static String getObjectLemma( Triplet triplet ){
         if ( triplet.getObjectCoref() != null ) {
             if ( triplet.getObjectCoref().getLemma() != null ) {
@@ -103,6 +114,11 @@ public class GenerateGraph
         }
     }
 
+    /**
+     * @inner
+     * @todo
+     *      Move to utils or to a class TripletSubject
+     */
     private static String getSubjectLemma( Triplet triplet ){
         if ( triplet.getSubjectCoref() != null ) {
             if ( triplet.getSubjectCoref().getLemma() != null ) {
