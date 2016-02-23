@@ -1,7 +1,15 @@
 package com.ontological.retrieval.Utilities;
 
+import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
+import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
+import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.dependency.Dependency;
+import org.apache.uima.fit.util.JCasUtil;
+import org.apache.uima.jcas.JCas;
 import org.springframework.util.DigestUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Dmitry Scherbakov
@@ -14,5 +22,98 @@ public class Utils
             return Constants.INVALID_HASH;
         }
         return DigestUtils.md5DigestAsHex( tk.getLemma().getValue().getBytes() );
+    }
+
+    public static List<Entity> parseForEntities(JCas aJCas, Sentence sentence ) {
+        List<Entity> entities = new ArrayList<>();
+        for ( Dependency dep : JCasUtil.selectCovered(aJCas, Dependency.class, sentence) ) {
+
+//            System.out.printf( "type_short_name [%s], governor [%s,%d-%d], dependent [%s,%d-%d]\n",
+//                    dep.getType().getShortName(),
+//                    dep.getGovernor().getCoveredText(),dep.getGovernor().getBegin(), dep.getGovernor().getEnd(),
+//                    dep.getDependent().getCoveredText(),dep.getDependent().getBegin(), dep.getDependent().getEnd() );
+
+            int uInnerEntityPos = dep.getDependent().getBegin();
+            Entity upperEntity = findEntity( uInnerEntityPos, entities );
+            if ( upperEntity == null ) {
+                upperEntity = new Entity( null, dep.getDependent(), dep.getType().getShortName() );
+                entities.add( upperEntity );
+            } else {
+                upperEntity.setType( dep.getType().getShortName() );
+            }
+
+            int dInnerEntityPos = dep.getGovernor().getBegin();
+            Entity downEntity = findEntity( dInnerEntityPos, entities );
+            if ( downEntity == null ) {
+                downEntity = new Entity( null, dep.getGovernor(), null );
+                entities.add( downEntity );
+            }
+            upperEntity.setParent( downEntity );
+        }
+        return entities;
+    }
+
+    public static Entity findEntity( int innerEntityPos, List<Entity> entities  ) {
+        for ( Entity en : entities ) {
+            if ( en.getBegin() == innerEntityPos ) {
+                return en;
+            }
+        }
+        return null;
+    }
+
+    public static Entity findEntityType( String type, List<Entity> entities  ) {
+        for (Entity en : entities) {
+            if (en.getType().equals(type)) {
+                return en;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isNoun( Token tk ) {
+        String text = tk.getCoveredText().toUpperCase();
+        boolean isSingleValid = !text.equals( 'I' ) && text.length() == 1;
+        if ( isSingleValid ) {
+            //
+            // garbage case. need to move to another function.
+            return false;
+        }
+        return ( tk.getPos().getPosValue().equals( "NN" ) ||
+                tk.getPos().getPosValue().equals( "NNS" ) ||
+                tk.getPos().getPosValue().equals( "NNP" ) ||
+                Models.isPronoun( tk.getCoveredText() ) );
+    }
+
+    public static void debugCoreference( Sentence sentence, CoreferenceLink link ) {
+        System.out.println( "\n[ Coref sentence ]: " + sentence.getCoveredText() );
+        System.out.printf( "[ Coref cur text ]: %s.\n", link.getCoveredText() );
+        System.out.printf( "[ Coref cur data ]: pos[%d-%d], ReferenceType[%s], ReferenceRelation[%s], Address[%d].\n",
+                link.getBegin(), link.getEnd(), link.getReferenceType(), link.getReferenceRelation(), link.getAddress());
+        CoreferenceLink next = link.getNext();
+        while ( next != null ) {
+            System.out.printf( "[ Coref next text ]: %s.\n", next.getCoveredText() );
+            System.out.printf( "[ Coref next data ]: pos[%d-%d], ReferenceType[%s], ReferenceRelation[%s], Address[%d].\n",
+                    next.getBegin(), next.getEnd(), next.getReferenceType(), next.getReferenceRelation(), next.getAddress());
+            next = next.getNext();
+        }
+    }
+
+    public static Triplet findTriplet( JCas aJCas, CoreferenceLink link, Sentence prevSentence )
+    {
+        for ( Triplet triplet : JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence ) ) {
+            if ( triplet.getSubjectCoref() != null && triplet.getSubject().getBegin() == link.getBegin() ) {
+                return triplet;
+            }
+        }
+        return null;
+    }
+
+    public static String listOfStringToString( List<String> list, String separator ) {
+        String out = "";
+        for ( String element : list ) {
+            out = out + element + separator;
+        }
+        return out;
     }
 }
