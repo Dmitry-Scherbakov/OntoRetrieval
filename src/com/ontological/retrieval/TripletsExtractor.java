@@ -4,7 +4,6 @@ import com.ontological.retrieval.Utilities.*;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
-import org.apache.uima.fit.component.JCasConsumer_ImplBase;
 import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
@@ -19,7 +18,7 @@ import java.util.List;
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */
-public class TripletsExtractor extends JCasConsumer_ImplBase
+public class TripletsExtractor extends AbstractTripletsAnalyzer
 {
     public static enum TripletValidationFactor
     {
@@ -69,7 +68,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
         if ( language.equals( "en" ) ) {
             handleStandfordTree( aJCas );
         } else {
-            System.out.println( "Currently, the only english language is supported." );
+            System.out.println( "TripletsExtractor: currently, the only english language is supported." );
             throw new AnalysisEngineProcessException();
         }
     }
@@ -86,67 +85,22 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             TripletScore forwardScore = parseForScore( aJCas, entitiesIndex );
             Triplet triplet = null;
             for ( Entity en : entitiesIndex ) {
-                //
-                // @todo
-                //          Need to implement parsing of the adjacent attributes of the
-                //          parsed entities.
-                if ( en.isLeaf() ) {
-                    //
-                    // It is normal case. Mostly, isLeaf == true means that this is a last element
-                    // in the graph path, but could not be the last element in the 'entitiesIndex'.
-                    continue;
-                }
-                if ( en.getType().equals( "NSUBJPASS" ) ) {
-                    //
-                    // @todo
-                    //          Add Object. Need to find examples for such type. Probably, such type have not
-                    //          'object', but need to verify it.
-                    //
-                    triplet = new Triplet( aJCas, sentence.getBegin(), sentence.getEnd(), sentence.getCoveredText() );
-                    triplet.setSubject( en.getName() );
-                    String relation = en.getParent().getName().getCoveredText();
-                    Entity innerEntity = Utils.findEntityType( "AUXPASS", en.getParent().getChildren() );
-                    if ( innerEntity != null ) {
-                        relation = innerEntity.getName().getCoveredText() + "_" + relation;
-                    }
-                    triplet.setRelation( relation );
-                } else if( en.getType().equals( "NSUBJ" ) ) {
+                triplet = parseForTriplet( aJCas, sentence, en, forwardScore );
 
-                    triplet = new Triplet( aJCas, sentence.getBegin(), sentence.getEnd(), sentence.getCoveredText() );
-                    triplet.setSubject( en.getName() );
-                    Entity dobjEntity = Utils.findEntityType( "DOBJ", en.getParent().getChildren() );
-                    if ( dobjEntity != null ) {
-                        triplet.setObject( dobjEntity.getName() );
-                        triplet.setRelation( en.getParent().getName().getCoveredText() );
-                    } else if ( en.getParent().getName().getPos().getPosValue().equals( "NN" ) ){
-                        triplet.setObject( en.getParent().getName() );
-                    }
-                    Entity copEntity = Utils.findEntityType( "COP", en.getParent().getChildren() );
-                    Entity negEntity = Utils.findEntityType( "NEG", en.getParent().getChildren() );
-                    if ( triplet.getRelation() == null && ( copEntity != null || negEntity != null ) ) {
-                        String relation = "";
-                        if ( copEntity != null ) {
-                            relation = copEntity.getName().getCoveredText();
-                        }
-                        if ( negEntity != null ) {
-                            relation += ( relation.isEmpty() ? negEntity.getName().getCoveredText() : ("_" + negEntity.getName().getCoveredText() ) );
-                        }
-                        if ( !triplet.isObject() && en.getParent().getName().getPos().getPosValue().equals( "VB" ) ) {
-                            relation += "_" + en.getParent().getName().getCoveredText();
-                        }
-                        triplet.setRelation( relation );
-                    }
-                }
                 if ( triplet != null ) {
+                    //
+                    // @fixme
+                    //      There is a bug: if triplets were filtered by `isTripletCorrect( )` condition
+                    //      (based on the applied TripletValidationFactor) these triples wont be indexed
+                    //      by UIMA. As a result `resolveCoreference` wont extract triples/dirty from
+                    //      `prevSentence`. So, as a temporary solution use TripletValidationFactor.ALL.
+                    //
                     resolveCoreference( aJCas, prevTr_InCurrSent, triplet, corefLinks, prevSentence );
                     resolvePosCollisions( triplet );
                     triplets.add( triplet );
                     prevTr_InCurrSent = triplet;
                     triplets.add( triplet );
-                    if ( isTripletCorrect( triplet, forwardScore ) ) {
-                        forwardScore.setBegin( sentence.getBegin() );
-                        forwardScore.setEnd( sentence.getEnd() );
-                        triplet.setScore( forwardScore );
+                    if ( isTripletCorrect( triplet ) ) {
                         triplet.addToIndexes( aJCas );
                     }
                     // There could be another sentence subject/main_point
@@ -159,7 +113,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
         }
     }
 
-    private boolean isTripletCorrect( Triplet triplet, TripletScore score )
+    private boolean isTripletCorrect( Triplet triplet )
     {
         if ( triplet == null || !triplet.isSubject() ) {
             return false;
@@ -171,9 +125,9 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             case ONLY_VALID:
                 return triplet.isValid();
             case MAXIMUM_AUTHORITY:
-                return score.getScoreValue() <= TripletScore.MAXIMUM_AUTHORITY_BOUND;
+                return triplet.getScore().getScoreValue() <= TripletScore.MAXIMUM_AUTHORITY_BOUND;
             case MAXIMUM_AUTHORITY_AND_VALID:
-                return score.getScoreValue() <= TripletScore.MAXIMUM_AUTHORITY_BOUND && triplet.isValid();
+                return triplet.getScore().getScoreValue() <= TripletScore.MAXIMUM_AUTHORITY_BOUND && triplet.isValid();
             default:
                 return false;
         }
@@ -235,37 +189,6 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
                     }
                 }
             }
-        }
-    }
-
-    private TripletScore parseForScore( JCas aJCas, List<Entity> entitiesIndex )
-    {
-        int sentenceSize = 0, mainPoints = 0, undeterminedRelations = 0;
-        for ( Entity en : entitiesIndex ) {
-            if ( !en.isLeaf() ) {
-                ++sentenceSize;
-                if ( en.getType().startsWith( "NSUBJ") ) {
-                    ++mainPoints;
-                } else if ( en.getType().equals( "Dependency" ) ) {
-                    ++undeterminedRelations;
-                }
-            }
-        }
-        return new TripletScore( aJCas, sentenceSize, undeterminedRelations, mainPoints );
-    }
-
-    private void resolvePosCollisions( Triplet triplet ) {
-        if ( triplet.getSubjectCoref() != null && !Utils.isNoun( triplet.getSubjectCoref() ) ) {
-            triplet.setSubjectCoref( null );
-        }
-        if ( triplet.getObjectCoref() != null && !Utils.isNoun( triplet.getObjectCoref() ) ) {
-            triplet.setObjectCoref( null );
-        }
-        if ( triplet.isObject() && !Utils.isNoun( triplet.getObject() ) ) {
-            triplet.setObject( null );
-        }
-        if ( triplet.isSubject() && !Utils.isNoun( triplet.getSubject() ) ) {
-            triplet.setSubject( null );
         }
     }
 }

@@ -8,15 +8,18 @@ import java.util.HashMap;
  */
 public class Models
 {
-    static final String PR_I = "I";
-    static final String PR_YOU = "YOU";
-    static final String PR_HE = "HE";
-    static final String PR_SHE = "SHE";
-    static final String PR_IT = "IT";
-    static final String PR_THEY = "THEY";
+    public static final String PR_I = "I";
+    public static final String PR_YOU = "YOU";
+    public static final String PR_HE = "HE";
+    public static final String PR_SHE = "SHE";
+    public static final String PR_IT = "IT";
+    public static final String PR_THEY = "THEY";
 
-    static final String PR_THAT = "THAT";
-    static final String PR_THEM = "THEM";
+    public static final String PR_THAT = "THAT";
+    public static final String PR_THEM = "THEM";
+    public static final String PR_WHO = "WHO";
+
+    public static final String PR_WHAT = "WHAT";
 
     static HashMap<Integer,String> m_PronounModel;
 
@@ -31,6 +34,8 @@ public class Models
             m_PronounModel.put( PR_THEY.hashCode(), PR_THEY );
             m_PronounModel.put( PR_THAT.hashCode(), PR_THAT );
             m_PronounModel.put( PR_THEM.hashCode(), PR_THEM );
+            m_PronounModel.put( PR_WHO.hashCode(), PR_WHO );
+            m_PronounModel.put( PR_WHAT.hashCode(), PR_WHAT );
         }
         return m_PronounModel.containsKey( word.toUpperCase().hashCode() );
     }

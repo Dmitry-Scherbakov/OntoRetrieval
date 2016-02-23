@@ -24,12 +24,20 @@ import java.util.List;
 public class TripletsWriter extends JCasConsumer_ImplBase
 {
     private static final String FILE_ENCODING = "UTF-8";
-    private static final String DEFAULT_TRIPLETS_PATH = "results/triplets.neo4j";
-    private static final String DEFAULT_SENTENCE_SEMANTIC_PATH = "results/sentence.semantic.log";
+    public static final String DEFAULT_TRIPLETS_PATH = "results/triplets.neo4j";
+    public static final String DEFAULT_SENTENCE_SEMANTIC_PATH = "results/sentence.semantic.log";
 
     public static final String PARAM_SINGLETON = "singleton";
     @ConfigurationParameter(name = PARAM_SINGLETON, defaultValue = "true", mandatory = true)
     private boolean singleton;
+
+    public static final String PARAM_TRIPLET_PATH = "tripletsPath";
+    @ConfigurationParameter(name = PARAM_TRIPLET_PATH, mandatory = false, defaultValue = DEFAULT_TRIPLETS_PATH)
+    protected String tripletsPath;
+
+    public static final String PARAM_SENTENCE_SEMANTIC_PATH = "senteceSemanticPath";
+    @ConfigurationParameter(name = PARAM_SENTENCE_SEMANTIC_PATH, mandatory = false, defaultValue = DEFAULT_SENTENCE_SEMANTIC_PATH)
+    protected String senteceSemanticPath;
 
     @Override
     public void process( JCas aJCas ) throws AnalysisEngineProcessException {
@@ -52,7 +60,7 @@ public class TripletsWriter extends JCasConsumer_ImplBase
             }
         }
         if ( triplets.size() > 0 ) {
-            try ( PrintWriter writer = new PrintWriter( DEFAULT_TRIPLETS_PATH, FILE_ENCODING ) ) {
+            try ( PrintWriter writer = new PrintWriter( tripletsPath, FILE_ENCODING ) ) {
                 writer.write( GenerateGraph.generateTripletsGraph( triplets ) );
             }
         }
@@ -68,7 +76,7 @@ public class TripletsWriter extends JCasConsumer_ImplBase
             }
         }
         if ( out.size() > 0 ) {
-            try ( PrintWriter writer = new PrintWriter( DEFAULT_SENTENCE_SEMANTIC_PATH, FILE_ENCODING ) ) {
+            try ( PrintWriter writer = new PrintWriter( senteceSemanticPath, FILE_ENCODING ) ) {
                 writer.write( Utils.listOfStringToString( out, "\n" ) );
             }
         }

@@ -17,57 +17,73 @@ public class Main {
 
 //    private static String DOCUMENT_PATH_ENG = "samples/en/encyclopedia/Angora-Goats.txt";
     private static String DOCUMENT_PATH_ENG = "samples/en/simple-pen.txt";
+    private static String QUESTIONS_PATH_ENG = "samples/en/questions/simple-pen-q.txt";
+//    private static String DOCUMENT_PATH_ENG = "samples/en/complicated-pen.txt";
     private static String DOCUMENT_PATH_RUS = "samples/ru/walt-disney-ru.txt";
 
     public static void main( String[] args ) throws Exception {
         boolean isRussian = false;
-        if ( isRussian ) {
-            parseRussian( DOCUMENT_PATH_RUS );
-        } else { // english
-            parseEnglish( DOCUMENT_PATH_ENG );
+        try {
+            if ( isRussian ) {
+                parseRussianCorpus( DOCUMENT_PATH_RUS );
+            } else { // english
+//                parseEnglishQuestions( QUESTIONS_PATH_ENG );
+                parseEnglishCorpus( DOCUMENT_PATH_ENG );
+            }
+        } catch ( UIMAException ex ) {
+            System.out.print("UIMAException: " + ex.toString());
+            ex.printStackTrace();
+        } catch ( IOException ex ) {
+            System.out.print("IOException: " + ex.toString());
+            ex.printStackTrace();
         }
         System.out.println( "Finished" );
     }
 
-    static private void parseEnglish( String path ) {
-        try {
-            CollectionReaderDescription readerDescription = createReaderDescription( TextReader.class,
-                    TextReader.PARAM_SOURCE_LOCATION, path,
-                    TextReader.PARAM_LANGUAGE, "en" );
+    static private void parseEnglishQuestions( String path ) throws UIMAException, IOException {
+        CollectionReaderDescription readerDescription = createReaderDescription( TextReader.class,
+                TextReader.PARAM_SOURCE_LOCATION, path,
+                TextReader.PARAM_LANGUAGE, "en" );
 
-            runPipeline( readerDescription,
-                    createEngineDescription( StanfordSegmenter.class ),
-                    createEngineDescription( StanfordPosTagger.class ),
-                    createEngineDescription( StanfordLemmatizer.class ),
-                    createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
-                    createEngineDescription( StanfordCoreferenceResolver.class ),
-                    createEngineDescription( StanfordNamedEntityRecognizer.class ),
-                    createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ONLY_VALID ),
-                    createEngineDescription( TripletsWriter.class ) );
-        } catch ( UIMAException ex ) {
-            System.out.print("[ EN ] UIMAException: " + ex.toString());
-            ex.printStackTrace();
-        } catch ( IOException ex ) {
-            System.out.print("[ EN ] IOException: " + ex.toString());
-            ex.printStackTrace();
-        }
+        runPipeline( readerDescription,
+                createEngineDescription( StanfordSegmenter.class ),
+                createEngineDescription( StanfordPosTagger.class ),
+                createEngineDescription( StanfordLemmatizer.class ),
+                createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
+                createEngineDescription( StanfordCoreferenceResolver.class ),
+                createEngineDescription( StanfordNamedEntityRecognizer.class ),
+                createEngineDescription( QuestionAnalyzer.class ),
+                createEngineDescription( TripletsWriter.class,
+                        TripletsWriter.PARAM_TRIPLET_PATH, "results/q_triplets.neo4j",
+                        TripletsWriter.PARAM_SENTENCE_SEMANTIC_PATH, "results/q_sentence.semantic.log" ) );
     }
 
-    static private void parseRussian( String path ) {
-        try {
-            CollectionReaderDescription readerDescription = createReaderDescription( TextReader.class,
-                    TextReader.PARAM_SOURCE_LOCATION, path,
-                    TextReader.PARAM_LANGUAGE, "ru" );
+    static private void parseEnglishCorpus( String path ) throws UIMAException, IOException {
+        CollectionReaderDescription readerDescription = createReaderDescription( TextReader.class,
+                TextReader.PARAM_SOURCE_LOCATION, path,
+                TextReader.PARAM_LANGUAGE, "en" );
 
-            runPipeline( readerDescription,
-                    createEngineDescription( BreakIteratorSegmenter.class ),
-                    createEngineDescription( TreeTaggerPosTagger.class ) );
-        } catch ( UIMAException ex ) {
-            System.out.print( "[ RUS ] UIMAException: " + ex.toString() );
-            ex.printStackTrace();
-        } catch ( IOException ex ) {
-            System.out.print( "[ RUS ] IOException: " + ex.toString() );
-            ex.printStackTrace();
-        }
+        runPipeline( readerDescription,
+                createEngineDescription( StanfordSegmenter.class ),
+                createEngineDescription( StanfordPosTagger.class ),
+                createEngineDescription( StanfordLemmatizer.class ),
+                createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
+                createEngineDescription( StanfordCoreferenceResolver.class ),
+                createEngineDescription( StanfordNamedEntityRecognizer.class ),
+                createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ALL ),
+                createEngineDescription( TripletsWriter.class,
+                        TripletsWriter.PARAM_TRIPLET_PATH, TripletsWriter.DEFAULT_TRIPLETS_PATH,
+                        TripletsWriter.PARAM_SENTENCE_SEMANTIC_PATH, TripletsWriter.DEFAULT_SENTENCE_SEMANTIC_PATH ),
+                createEngineDescription( SimpleAnswerMatcher.class ) );
+    }
+
+    static private void parseRussianCorpus( String path ) throws UIMAException, IOException {
+        CollectionReaderDescription readerDescription = createReaderDescription( TextReader.class,
+                TextReader.PARAM_SOURCE_LOCATION, path,
+                TextReader.PARAM_LANGUAGE, "ru" );
+
+        runPipeline( readerDescription,
+                createEngineDescription( BreakIteratorSegmenter.class ),
+                createEngineDescription( TreeTaggerPosTagger.class ) );
     }
 }
