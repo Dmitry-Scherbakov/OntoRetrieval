@@ -51,4 +51,4 @@ All of existing feature will be improved in future. If you see: incorrect fact e
 
 ##Licensing
 
-This system could be used within the scope of [Attribution-NonCommercial 4.0 (CC BY-NC 4.0)](http://creativecommons.org/licenses/by-nc/4.0/) licensing.
+This system could be used within the scope of [Attribution-NonCommercial 4.0 (CC BY-NC 4.0)](http://creativecommons.org/licenses/by-nc/4.0/) licensing. If this license in not applicable for you, write us and we will discuss it.
