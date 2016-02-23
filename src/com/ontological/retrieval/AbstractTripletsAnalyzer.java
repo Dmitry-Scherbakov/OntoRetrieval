@@ -11,7 +11,8 @@ import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import java.util.List;
 
 /**
- * Created by Administrator on 23.02.2016.
+ * @author Dmitry Scherbakov
+ * @email  dm.scherbakov[_d0g_]yandex.ru
  */
 abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
 {
