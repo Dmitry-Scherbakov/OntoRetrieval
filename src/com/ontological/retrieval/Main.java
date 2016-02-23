@@ -41,7 +41,8 @@ public class Main {
                     createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                     createEngineDescription( StanfordCoreferenceResolver.class ),
                     createEngineDescription( StanfordNamedEntityRecognizer.class ),
-                    createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ONLY_VALID ) );
+                    createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ONLY_VALID ),
+                    createEngineDescription( TripletsWriter.class ) );
         } catch ( UIMAException ex ) {
             System.out.print("[ EN ] UIMAException: " + ex.toString());
             ex.printStackTrace();

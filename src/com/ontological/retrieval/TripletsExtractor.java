@@ -1,24 +1,14 @@
 package com.ontological.retrieval;
 
-import com.ontological.retrieval.Utilities.Entity;
-import com.ontological.retrieval.Utilities.Models;
-import com.ontological.retrieval.Utilities.Neo4j.GenerateGraph;
-import com.ontological.retrieval.Utilities.Triplet;
-import com.ontological.retrieval.Utilities.TripletScore;
+import com.ontological.retrieval.Utilities.*;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
-import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
-import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.dependency.Dependency;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasConsumer_ImplBase;
 import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,12 +77,11 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
     private void handleStandfordTree( JCas aJCas ) throws AnalysisEngineProcessException
     {
         List<Triplet> triplets = new ArrayList<>();
-//        List<String> scripts = new ArrayList<>();
         HashMap<Integer,CoreferenceLink> corefLinks = new HashMap<>();
         Sentence prevSentence = null;
         Triplet prevTr_InCurrSent = null;
         for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
-            List<Entity> entitiesIndex = parseForGraph( aJCas, sentence );
+            List<Entity> entitiesIndex = Utils.parseForEntities( aJCas, sentence );
             cacheCoreferenceLink( aJCas, sentence, corefLinks );
             TripletScore forwardScore = parseForScore( aJCas, entitiesIndex );
             Triplet triplet = null;
@@ -116,7 +105,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
                     triplet = new Triplet( aJCas, sentence.getBegin(), sentence.getEnd(), sentence.getCoveredText() );
                     triplet.setSubject( en.getName() );
                     String relation = en.getParent().getName().getCoveredText();
-                    Entity innerEntity = findEntityType( "AUXPASS", en.getParent().getChildren() );
+                    Entity innerEntity = Utils.findEntityType( "AUXPASS", en.getParent().getChildren() );
                     if ( innerEntity != null ) {
                         relation = innerEntity.getName().getCoveredText() + "_" + relation;
                     }
@@ -125,15 +114,15 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 
                     triplet = new Triplet( aJCas, sentence.getBegin(), sentence.getEnd(), sentence.getCoveredText() );
                     triplet.setSubject( en.getName() );
-                    Entity dobjEntity = findEntityType( "DOBJ", en.getParent().getChildren() );
+                    Entity dobjEntity = Utils.findEntityType( "DOBJ", en.getParent().getChildren() );
                     if ( dobjEntity != null ) {
                         triplet.setObject( dobjEntity.getName() );
                         triplet.setRelation( en.getParent().getName().getCoveredText() );
                     } else if ( en.getParent().getName().getPos().getPosValue().equals( "NN" ) ){
                         triplet.setObject( en.getParent().getName() );
                     }
-                    Entity copEntity = findEntityType( "COP", en.getParent().getChildren() );
-                    Entity negEntity = findEntityType( "NEG", en.getParent().getChildren() );
+                    Entity copEntity = Utils.findEntityType( "COP", en.getParent().getChildren() );
+                    Entity negEntity = Utils.findEntityType( "NEG", en.getParent().getChildren() );
                     if ( triplet.getRelation() == null && ( copEntity != null || negEntity != null ) ) {
                         String relation = "";
                         if ( copEntity != null ) {
@@ -167,30 +156,6 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
             }
             prevSentence = sentence;
             prevTr_InCurrSent = null;
-            //
-            // Create scripts for modeling sentence graph for Neo4j. It is for debug purpose.
-//            scripts.add( GenerateGraph.generateSentenceGraph( entitiesIndex ) );
-//            for ( String script : scripts ) {
-//                System.out.println ( sentence.getCoveredText() );
-//                System.out.println( script );
-//            }
-        }
-        List<Triplet> trForGraph = new ArrayList<>();
-        for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
-//            System.out.println( "\n[ SENT ] " + sentence.getCoveredText() );
-            for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
-                trForGraph.add( tr );
-//                tr.printShortCoref();
-            }
-        }
-        try {
-            PrintWriter writer = new PrintWriter( "out.src", "UTF-8" );
-            writer.write( GenerateGraph.generateTripletsGraph( trForGraph ) );
-            writer.close();
-        } catch ( UnsupportedEncodingException ex ) {
-            ex.printStackTrace();
-        } catch ( FileNotFoundException ex ) {
-            ex.printStackTrace();
         }
     }
 
@@ -217,12 +182,10 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
     private void cacheCoreferenceLink( JCas aJCas, Sentence sentence, HashMap<Integer,CoreferenceLink> corefLinks )
     {
         for ( CoreferenceLink link : JCasUtil.selectCovered( aJCas, CoreferenceLink.class, sentence ) ) {
-//            debugCoreference( sentence, link );
+//            Utils.debugCoreference( sentence, link );
             if ( link.getReferenceType().equals( "PRONOMINAL" ) ) {
                 if ( link.getNext() != null && !corefLinks.containsKey( link.getNext().getBegin() ) ) {
                     corefLinks.put( link.getNext().getBegin(), link );
-//                    System.out.printf( "Cache PRONOMINAL link name [%s:%d] -> next_name [%s], begin [%d].\n",
-//                            link.getCoveredText(), link.getBegin(), link.getNext().getCoveredText(), link.getNext().getBegin() );
                 }
             } // another is 'NOMINAL'
         }
@@ -240,7 +203,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 
         if ( triplet.isObject() && corefLinks.containsKey( triplet.getObject().getBegin() ) ) {
             CoreferenceLink corefEn = corefLinks.get( triplet.getObject().getBegin() );
-            Triplet corefDonor = findTriplet( aJCas, corefEn, prevSentence );
+            Triplet corefDonor = Utils.findTriplet( aJCas, corefEn, prevSentence );
             if ( corefDonor != null ) {
                 triplet.setObjectCoref( corefDonor.getSubjectCoref() );
             }
@@ -248,8 +211,10 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 
         if ( triplet.isSubject() && triplet.getSubjectCoref() == null && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
             if ( Models.isPositionedPronoun( triplet.getSubject().getCoveredText() ) ) {
-                // Some pronouns should searched in a current sentence. The example
-                // of such pronoun is 'that'.
+                //
+                // Some pronouns should searched in a current sentence.
+                // The example of such pronoun is 'that'.
+                //
                 if ( prevTr_InCurrSent != null ) {
                     if ( prevTr_InCurrSent.getSubjectCoref() != null ) {
                         triplet.setSubjectCoref( prevTr_InCurrSent.getSubjectCoref() );
@@ -273,16 +238,6 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
         }
     }
 
-    private Triplet findTriplet( JCas aJCas, CoreferenceLink link, Sentence prevSentence )
-    {
-        for ( Triplet triplet : JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence ) ) {
-            if ( triplet.getSubjectCoref() != null && triplet.getSubject().getBegin() == link.getBegin() ) {
-                return triplet;
-            }
-        }
-        return null;
-    }
-
     private TripletScore parseForScore( JCas aJCas, List<Entity> entitiesIndex )
     {
         int sentenceSize = 0, mainPoints = 0, undeterminedRelations = 0;
@@ -299,101 +254,17 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
         return new TripletScore( aJCas, sentenceSize, undeterminedRelations, mainPoints );
     }
 
-    //
-    // @todo
-    //       Move to utils.
-    //
-    private List<Entity> parseForGraph( JCas aJCas, Sentence sentence ) {
-        List<Entity> entities = new ArrayList<>();
-        for ( Dependency dep : JCasUtil.selectCovered(aJCas, Dependency.class, sentence) ) {
-
-//            System.out.printf( "type_short_name [%s], governor [%s,%d-%d], dependent [%s,%d-%d]\n",
-//                    dep.getType().getShortName(),
-//                    dep.getGovernor().getCoveredText(),dep.getGovernor().getBegin(), dep.getGovernor().getEnd(),
-//                    dep.getDependent().getCoveredText(),dep.getDependent().getBegin(), dep.getDependent().getEnd() );
-
-            int uInnerEntityPos = dep.getDependent().getBegin();
-            Entity upperEntity = findEntity( uInnerEntityPos, entities );
-            if ( upperEntity == null ) {
-                upperEntity = new Entity( null, dep.getDependent(), dep.getType().getShortName() );
-                entities.add( upperEntity );
-            } else {
-                upperEntity.setType( dep.getType().getShortName() );
-            }
-
-            int dInnerEntityPos = dep.getGovernor().getBegin();
-            Entity downEntity = findEntity( dInnerEntityPos, entities );
-            if ( downEntity == null ) {
-                downEntity = new Entity( null, dep.getGovernor(), null );
-                entities.add( downEntity );
-            }
-            upperEntity.setParent( downEntity );
-        }
-        return entities;
-    }
-
-    //
-    // @todo
-    //       Create a container for storing Entities and move @method findEntity
-    //       and @method findEntityType to that container.
-    //
-
-    public Entity findEntity( int innerEntityPos, List<Entity> entities  ) {
-        for ( Entity en : entities ) {
-            if ( en.getBegin() == innerEntityPos ) {
-                return en;
-            }
-        }
-        return null;
-    }
-    public Entity findEntityType( String type, List<Entity> entities  ) {
-        for (Entity en : entities) {
-            if (en.getType().equals(type)) {
-                return en;
-            }
-        }
-        return null;
-    }
-
-    private void debugCoreference( Sentence sentence, CoreferenceLink link ) {
-        System.out.println( "\n[ Coref sentence ]: " + sentence.getCoveredText() );
-        System.out.printf( "[ Coref cur text ]: %s.\n", link.getCoveredText() );
-        System.out.printf( "[ Coref cur data ]: pos[%d-%d], ReferenceType[%s], ReferenceRelation[%s], Address[%d].\n",
-                link.getBegin(), link.getEnd(), link.getReferenceType(), link.getReferenceRelation(), link.getAddress());
-        CoreferenceLink next = link.getNext();
-        while ( next != null ) {
-            System.out.printf( "[ Coref next text ]: %s.\n", next.getCoveredText() );
-            System.out.printf( "[ Coref next data ]: pos[%d-%d], ReferenceType[%s], ReferenceRelation[%s], Address[%d].\n",
-                    next.getBegin(), next.getEnd(), next.getReferenceType(), next.getReferenceRelation(), next.getAddress());
-            next = next.getNext();
-        }
-    }
-
-    private boolean isNoun( Token tk ) {
-        String text = tk.getCoveredText().toUpperCase();
-        boolean isSingleValid = !text.equals( 'I' ) && text.length() == 1;
-        if ( isSingleValid ) {
-            //
-            // garbage case. need to move to another function.
-            return false;
-        }
-        return ( tk.getPos().getPosValue().equals( "NN" ) ||
-                tk.getPos().getPosValue().equals( "NNS" ) ||
-                tk.getPos().getPosValue().equals( "NNP" ) ||
-                Models.isPronoun( tk.getCoveredText() ) );
-    }
-
     private void resolvePosCollisions( Triplet triplet ) {
-        if ( triplet.getSubjectCoref() != null && !isNoun( triplet.getSubjectCoref() ) ) {
+        if ( triplet.getSubjectCoref() != null && !Utils.isNoun( triplet.getSubjectCoref() ) ) {
             triplet.setSubjectCoref( null );
         }
-        if ( triplet.getObjectCoref() != null && !isNoun( triplet.getObjectCoref() ) ) {
+        if ( triplet.getObjectCoref() != null && !Utils.isNoun( triplet.getObjectCoref() ) ) {
             triplet.setObjectCoref( null );
         }
-        if ( triplet.isObject() && !isNoun( triplet.getObject() ) ) {
+        if ( triplet.isObject() && !Utils.isNoun( triplet.getObject() ) ) {
             triplet.setObject( null );
         }
-        if ( triplet.isSubject() && !isNoun( triplet.getSubject() ) ) {
+        if ( triplet.isSubject() && !Utils.isNoun( triplet.getSubject() ) ) {
             triplet.setSubject( null );
         }
     }
