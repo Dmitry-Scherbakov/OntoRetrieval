@@ -5,7 +5,6 @@ import static org.apache.uima.fit.factory.CollectionReaderFactory.createReaderDe
 import static org.apache.uima.fit.pipeline.SimplePipeline.runPipeline;
 
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
-import de.tudarmstadt.ukp.dkpro.core.maltparser.MaltParser;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.*;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.treetagger.TreeTaggerPosTagger;
@@ -16,14 +15,15 @@ import java.io.IOException;
 
 public class Main {
 
-    private static String DOCUMENT_PATH = "docs/walt-disney-ru.txt";
+    private static String DOCUMENT_PATH_ENG = "samples/en/simple-pen.txt";
+    private static String DOCUMENT_PATH_RUS = "samples/ru/walt-disney-ru.txt";
 
     public static void main( String[] args ) throws Exception {
         boolean isRussian = false;
         if ( isRussian ) {
-            parseRussian( "docs/walt-disney-ru.txt" );
+            parseRussian( DOCUMENT_PATH_RUS );
         } else { // english
-            parseEnglish( "docs/simple-pen.txt" );
+            parseEnglish( DOCUMENT_PATH_ENG );
         }
         System.out.println( "Finished" );
     }
@@ -41,7 +41,7 @@ public class Main {
                     createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                     createEngineDescription( StanfordCoreferenceResolver.class ),
                     createEngineDescription( StanfordNamedEntityRecognizer.class ),
-                    createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ALL ) );
+                    createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ONLY_VALID ) );
         } catch ( UIMAException ex ) {
             System.out.print("[ EN ] UIMAException: " + ex.toString());
             ex.printStackTrace();
