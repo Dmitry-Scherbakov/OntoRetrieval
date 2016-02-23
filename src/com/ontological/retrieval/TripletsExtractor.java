@@ -15,6 +15,10 @@ import org.apache.uima.fit.descriptor.ConfigurationParameter;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +74,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 
     @Override
     public void process(JCas aJCas) throws AnalysisEngineProcessException {
+        System.out.println( "Started TripletsExtractor annotator." );
         String language = aJCas.getDocumentLanguage();
         if ( language.equals( "en" ) ) {
             handleStandfordTree( aJCas );
@@ -170,16 +175,23 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
 //                System.out.println( script );
 //            }
         }
-//        System.out.println( "==================" );
-//        List<Triplet> trForGraph = new ArrayList<>();
-//        for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
+        List<Triplet> trForGraph = new ArrayList<>();
+        for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
 //            System.out.println( "\n[ SENT ] " + sentence.getCoveredText() );
-//            for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
-//                trForGraph.add( tr );
+            for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
+                trForGraph.add( tr );
 //                tr.printShortCoref();
-//            }
-//        }
-//        System.out.printf( "[ GRAPH SCRIPT ]:\n%s\n", GenerateGraph.generateTripletsGraph( trForGraph ) );
+            }
+        }
+        try {
+            PrintWriter writer = new PrintWriter( "out.src", "UTF-8" );
+            writer.write( GenerateGraph.generateTripletsGraph( trForGraph ) );
+            writer.close();
+        } catch ( UnsupportedEncodingException ex ) {
+            ex.printStackTrace();
+        } catch ( FileNotFoundException ex ) {
+            ex.printStackTrace();
+        }
     }
 
     private boolean isTripletCorrect( Triplet triplet, TripletScore score )
@@ -245,7 +257,7 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
                         triplet.setSubjectCoref( prevTr_InCurrSent.getSubject() );
                     }
                 }
-            } else {
+            } else if ( prevSentence != null ) {
                 List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
                 if ( tripletsList != null && tripletsList.size() > 0 ) {
                     Triplet donorTriplet = tripletsList.get( tripletsList.size() - 1 );
@@ -358,6 +370,13 @@ public class TripletsExtractor extends JCasConsumer_ImplBase
     }
 
     private boolean isNoun( Token tk ) {
+        String text = tk.getCoveredText().toUpperCase();
+        boolean isSingleValid = !text.equals( 'I' ) && text.length() == 1;
+        if ( isSingleValid ) {
+            //
+            // garbage case. need to move to another function.
+            return false;
+        }
         return ( tk.getPos().getPosValue().equals( "NN" ) ||
                 tk.getPos().getPosValue().equals( "NNS" ) ||
                 tk.getPos().getPosValue().equals( "NNP" ) ||
