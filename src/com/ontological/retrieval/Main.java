@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class Main {
 
+//    private static String DOCUMENT_PATH_ENG = "samples/en/encyclopedia/Angora-Goats.txt";
     private static String DOCUMENT_PATH_ENG = "samples/en/simple-pen.txt";
     private static String DOCUMENT_PATH_RUS = "samples/ru/walt-disney-ru.txt";
 
