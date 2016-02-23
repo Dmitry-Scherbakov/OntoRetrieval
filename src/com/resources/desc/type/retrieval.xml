@@ -45,6 +45,11 @@
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
                 <featureDescription>
+                    <name>context</name>
+                    <description>Context (sentence) of current triplet.</description>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
                     <name>relation</name>
                     <description>Relation of a triplet.</description>
                     <rangeTypeName>uima.cas.String</rangeTypeName>

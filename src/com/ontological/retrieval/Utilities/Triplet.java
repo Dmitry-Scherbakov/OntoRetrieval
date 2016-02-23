@@ -142,6 +142,9 @@ public class Triplet extends Annotation
     public String getObjectId() {
         return m_ObjectId;
     }
+    public String getContext() {
+        return m_Context;
+    }
 
     public boolean isObject() {
         return m_Object != null && !m_Object.getCoveredText().isEmpty();
@@ -185,8 +188,8 @@ public class Triplet extends Annotation
         return cl;
     }
     public void printShortCoref() {
-        String sbj = m_SubjectCoref == null ? ( isSubject() ? m_Subject.getCoveredText() : "" ) : "coref$" + m_SubjectCoref.getCoveredText();
-        String obj = m_ObjectCoref == null ? ( isObject() ? m_Object.getCoveredText() : "" ) : "coref$" + m_ObjectCoref.getCoveredText();
+        String sbj = m_SubjectCoref == null ? ( isSubject() ? m_Subject.getLemma().getValue() : "" ) : "coref$" + m_SubjectCoref.getLemma().getValue();
+        String obj = m_ObjectCoref == null ? ( isObject() ? m_Object.getLemma().getValue() : "" ) : "coref$" + m_ObjectCoref.getLemma().getValue();
         String sbjPosVal = sbj.isEmpty() ? "" : (m_SubjectCoref == null ? m_Subject.getPos().getPosValue() : m_SubjectCoref.getPos().getPosValue());
         String objPosVal = obj.isEmpty() ? "" : (m_ObjectCoref == null ? m_Object.getPos().getPosValue() : m_ObjectCoref.getPos().getPosValue());
         System.out.printf( "[ short_coref_triplet ] < %s >/%s/ :%s < %s >/%s/\n",

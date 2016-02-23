@@ -79,6 +79,9 @@ public class Triplet_Type extends Annotation_Type
     final Feature clone_f;
     final int clone_code;
 
+    final Feature context_f;
+    final int context_code;
+
     public int getSubjectCoref( int addr )
     {
         if ( featOkTst && subjectCoref_f == null ) {
@@ -231,6 +234,14 @@ public class Triplet_Type extends Annotation_Type
         return ll_cas.ll_getRefValue( addr, clone_code );
     }
 
+    public int getContext( int addr )
+    {
+        if ( featOkTst && context_f == null ) {
+            jcas.throwFeatMissing( "context", "uima.cas.String" );
+        }
+        return ll_cas.ll_getRefValue( addr, context_code );
+    }
+
     public Triplet_Type( JCas jcas, Type casType )
     {
         super(jcas, casType);
@@ -274,5 +285,8 @@ public class Triplet_Type extends Annotation_Type
 
         score_f = jcas.getRequiredFeatureDE(casType, "score", "com.ontological.retrieval.Utilities.TripletScore", featOkTst);
         score_code  = (null == score_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)score_f).getCode();
+
+        context_f = jcas.getRequiredFeatureDE(casType, "context", "uima.cas.String", featOkTst);
+        context_code  = (null == context_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)context_f).getCode();
     }
 }
