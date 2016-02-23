@@ -39,9 +39,16 @@ The main purpose of all algorithms is the multilingual Question-Answer system.
  
 ##Implemented features
 
+* Samples for testing current system.
 * Extraction of facts from unstructured text data (English language).
-* Co-reference Resolver.
+* Coreference Resolver.
 * Added Triplets object to UIMA indexer.
 * Utils for generate Neo4j script for modeling sentence semantic structure.
- 
+* Utils for generate Neo4j script for modeling the full graph of all parsed triplets.
+* Simple Question/Answer engine
+
 All of existing feature will be improved in future. If you see: incorrect fact extraction or think it could be improved in some specific case, plz create a githib issue.
+
+##Licensing
+
+This system could be used within the scope of [Attribution-NonCommercial 4.0 (CC BY-NC 4.0)](http://creativecommons.org/licenses/by-nc/4.0/) licensing.
