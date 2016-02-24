@@ -1,4 +1,4 @@
-package com.ontological.retrieval.Utilities;
+package com.ontological.retrieval.DataTypes;
 
 /**
  * @author Dmitry Scherbakov
@@ -13,10 +13,10 @@ public class Question
     private String m_Context;
 
     public Question( Triplet triplet ) {
-        m_Subject = triplet.getSubjectCoref() != null ? triplet.getSubjectCoref().getLemma().getValue() : triplet.getSubject().getLemma().getValue();
-        m_Object = triplet.getObjectCoref() != null ? triplet.getObjectCoref().getLemma().getValue() : triplet.getObject().getLemma().getValue();
+        m_Subject = triplet.getSubject().getField().getLemma().getValue();
+        m_Object = triplet.getObject().getField().getLemma().getValue();
         m_Relation = triplet.getRelation();
-        m_Context = triplet.getContext();
+        m_Context = triplet.getContext().getCoveredText();
     }
 
     public String getSubject() {

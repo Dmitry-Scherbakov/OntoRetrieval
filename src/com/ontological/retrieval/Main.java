@@ -4,6 +4,10 @@ import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDesc
 import static org.apache.uima.fit.factory.CollectionReaderFactory.createReaderDescription;
 import static org.apache.uima.fit.pipeline.SimplePipeline.runPipeline;
 
+import com.ontological.retrieval.AnalysisEngines.QuestionAnalyzer;
+import com.ontological.retrieval.AnalysisEngines.SimpleAnswerMatcher;
+import com.ontological.retrieval.AnalysisEngines.TripletsExtractor;
+import com.ontological.retrieval.AnalysisEngines.TripletsWriter;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.*;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;

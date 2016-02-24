@@ -1,5 +1,9 @@
-package com.ontological.retrieval;
+package com.ontological.retrieval.AnalysisEngines;
 
+import com.ontological.retrieval.DataTypes.Entity;
+import com.ontological.retrieval.DataTypes.Question;
+import com.ontological.retrieval.DataTypes.Triplet;
+import com.ontological.retrieval.DataTypes.TripletScore;
 import com.ontological.retrieval.Utilities.*;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -64,7 +68,7 @@ public class QuestionAnalyzer extends AbstractTripletsAnalyzer
                     //      structure like that: "Who invented 'some_thing' and used 'it/them/...'
                     //      for 'something'
                     //
-//                    triplet.printShortCoref();
+//                    triplet.print();
 //                    resolvePosCollisions( triplet );
                     if ( triplet.isValid() ) {
                         triplets.add( triplet );
