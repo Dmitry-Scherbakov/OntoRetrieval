@@ -1,4 +1,4 @@
-package com.ontological.retrieval.Utilities;
+package com.ontological.retrieval.DataTypes;
 
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.jcas.JCasRegistry;

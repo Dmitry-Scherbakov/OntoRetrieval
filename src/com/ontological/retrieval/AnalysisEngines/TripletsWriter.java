@@ -1,8 +1,8 @@
-package com.ontological.retrieval;
+package com.ontological.retrieval.AnalysisEngines;
 
-import com.ontological.retrieval.Utilities.Entity;
+import com.ontological.retrieval.DataTypes.Entity;
 import com.ontological.retrieval.Utilities.Neo4j.GenerateGraph;
-import com.ontological.retrieval.Utilities.Triplet;
+import com.ontological.retrieval.DataTypes.Triplet;
 import com.ontological.retrieval.Utilities.Utils;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;

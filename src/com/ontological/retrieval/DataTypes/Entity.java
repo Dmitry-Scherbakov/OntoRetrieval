@@ -1,4 +1,4 @@
-package com.ontological.retrieval.Utilities;
+package com.ontological.retrieval.DataTypes;
 
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 

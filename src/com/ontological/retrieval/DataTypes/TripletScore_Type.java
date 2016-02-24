@@ -1,4 +1,4 @@
-package com.ontological.retrieval.Utilities;
+package com.ontological.retrieval.DataTypes;
 
 import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.FeatureStructure;
@@ -37,7 +37,7 @@ public class TripletScore_Type extends Annotation_Type
     public final static int typeIndexID = TripletScore.typeIndexID;
 
     @SuppressWarnings ("hiding")
-    public final static boolean featOkTst = JCasRegistry.getFeatOkTst( "com.ontological.retrieval.Utilities.TripletScore" );
+    public final static boolean featOkTst = JCasRegistry.getFeatOkTst( "com.ontological.retrieval.DataTypes.TripletScore" );
 
     final Feature scoreValue_f;
     final int scoreValue_Code;

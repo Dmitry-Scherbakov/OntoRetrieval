@@ -1,8 +1,8 @@
 package com.ontological.retrieval.Utilities.Neo4j;
 
 import com.ontological.retrieval.Utilities.Constants;
-import com.ontological.retrieval.Utilities.Entity;
-import com.ontological.retrieval.Utilities.Triplet;
+import com.ontological.retrieval.DataTypes.Entity;
+import com.ontological.retrieval.DataTypes.Triplet;
 
 import java.util.*;
 
@@ -59,8 +59,8 @@ public class GenerateGraph
         List<String> edges = new ArrayList<>();
         for ( Triplet triplet : triplets ) {
 
-            String objectId = triplet.getObjectId();
-            String subjectId = triplet.getSubjectId();
+            String objectId = triplet.getObject() == null ? null : triplet.getObject().getId();
+            String subjectId = triplet.getSubject() == null ? null : triplet.getSubject().getId();
 
             if ( objectId != null && !objectId.equals( Constants.INVALID_HASH ) && !nodes.containsKey( objectId ) ) {
                 nodes.put( objectId, getObjectLemma( triplet ) );
@@ -93,45 +93,17 @@ public class GenerateGraph
         return graph;
     }
 
-    /**
-     * @inner
-     * @todo
-     *      Move to utils or to a class TripletObject
-     */
     private static String getObjectLemma( Triplet triplet ){
-        if ( triplet.getObjectCoref() != null ) {
-            if ( triplet.getObjectCoref().getLemma() != null ) {
-                return triplet.getObjectCoref().getLemma().getValue();
-            } else {
-                return triplet.getObjectCoref().getCoveredText();
-            }
-        } else {
-            if ( triplet.getObject().getLemma() != null ) {
-                return triplet.getObject().getLemma().getValue();
-            } else {
-                return triplet.getObject().getCoveredText();
-            }
+        if ( triplet.getObject() != null && triplet.getObject().isValid() ) {
+            return triplet.getObject().getField().getLemma().getValue();
         }
+        return null;
     }
 
-    /**
-     * @inner
-     * @todo
-     *      Move to utils or to a class TripletSubject
-     */
     private static String getSubjectLemma( Triplet triplet ){
-        if ( triplet.getSubjectCoref() != null ) {
-            if ( triplet.getSubjectCoref().getLemma() != null ) {
-                return triplet.getSubjectCoref().getLemma().getValue();
-            } else {
-                return triplet.getSubjectCoref().getCoveredText();
-            }
-        } else {
-            if ( triplet.getSubject().getLemma() != null ) {
-                return triplet.getSubject().getLemma().getValue();
-            } else {
-                return triplet.getSubject().getCoveredText();
-            }
+        if ( triplet.getSubject() != null && triplet.getSubject().isValid() ) {
+            return triplet.getSubject().getField().getLemma().getValue();
         }
+        return null;
     }
 }

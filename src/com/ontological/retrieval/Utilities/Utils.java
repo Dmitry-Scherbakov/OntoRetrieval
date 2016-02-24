@@ -1,5 +1,8 @@
 package com.ontological.retrieval.Utilities;
 
+import com.ontological.retrieval.DataTypes.Entity;
+import com.ontological.retrieval.DataTypes.Triplet;
+import com.ontological.retrieval.DataTypes.TripletField;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
@@ -102,7 +105,8 @@ public class Utils
     public static Triplet findTriplet( JCas aJCas, CoreferenceLink link, Sentence prevSentence )
     {
         for ( Triplet triplet : JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence ) ) {
-            if ( triplet.getSubjectCoref() != null && triplet.getSubject().getBegin() == link.getBegin() ) {
+            TripletField subject = triplet.getSubject();
+            if ( subject != null && subject.isCoreference() && subject.getBegin() == link.getBegin() ) {
                 return triplet;
             }
         }

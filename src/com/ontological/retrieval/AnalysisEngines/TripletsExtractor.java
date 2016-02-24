@@ -1,5 +1,9 @@
-package com.ontological.retrieval;
+package com.ontological.retrieval.AnalysisEngines;
 
+import com.ontological.retrieval.DataTypes.Entity;
+import com.ontological.retrieval.DataTypes.Triplet;
+import com.ontological.retrieval.DataTypes.TripletField;
+import com.ontological.retrieval.DataTypes.TripletScore;
 import com.ontological.retrieval.Utilities.*;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
@@ -115,7 +119,8 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
 
     private boolean isTripletCorrect( Triplet triplet )
     {
-        if ( triplet == null || !triplet.isSubject() ) {
+        TripletField subject = triplet.getSubject();
+        if ( triplet == null || subject == null || !subject.isValid() ) {
             return false;
         }
         switch ( factor )
@@ -147,7 +152,8 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
 
     private void resolveCoreference( JCas aJCas, Triplet prevTr_InCurrSent, Triplet triplet, HashMap<Integer,CoreferenceLink> corefLinks, Sentence prevSentence )
     {
-        if ( triplet.isSubject() && corefLinks.containsKey( triplet.getSubject().getBegin() ) ) {
+        TripletField subject = triplet.getSubject();
+        if ( subject != null && subject.isValid() && corefLinks.containsKey( triplet.getSubject().getBegin() ) ) {
             CoreferenceLink corefEn = corefLinks.get( triplet.getSubject().getBegin() );
             //
             // @todo
@@ -155,37 +161,31 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
             //          it could be implemented identical as in the case below for Triplet.Object.
         }
 
-        if ( triplet.isObject() && corefLinks.containsKey( triplet.getObject().getBegin() ) ) {
+        TripletField object = triplet.getObject();
+        if ( object != null && object.isValid() && corefLinks.containsKey( triplet.getObject().getBegin() ) ) {
             CoreferenceLink corefEn = corefLinks.get( triplet.getObject().getBegin() );
             Triplet corefDonor = Utils.findTriplet( aJCas, corefEn, prevSentence );
             if ( corefDonor != null ) {
-                triplet.setObjectCoref( corefDonor.getSubjectCoref() );
+                object.setFieldCoref( corefDonor.getSubject().getField() );
             }
         }
 
-        if ( triplet.isSubject() && triplet.getSubjectCoref() == null && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
+        if ( subject != null && subject.isValid() && !subject.isCoreference() && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
             if ( Models.isPositionedPronoun( triplet.getSubject().getCoveredText() ) ) {
                 //
                 // Some pronouns should searched in a current sentence.
                 // The example of such pronoun is 'that'.
                 //
                 if ( prevTr_InCurrSent != null ) {
-                    if ( prevTr_InCurrSent.getSubjectCoref() != null ) {
-                        triplet.setSubjectCoref( prevTr_InCurrSent.getSubjectCoref() );
-                    } else {
-                        triplet.setSubjectCoref( prevTr_InCurrSent.getSubject() );
-                    }
+                    TripletField prev = prevTr_InCurrSent.getSubject();
+                    subject.setFieldCoref( prev.getField() );
                 }
             } else if ( prevSentence != null ) {
                 List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
                 if ( tripletsList != null && tripletsList.size() > 0 ) {
                     Triplet donorTriplet = tripletsList.get( tripletsList.size() - 1 );
                     if ( donorTriplet.getScore().getMainPointsCount() <= 2 ) {
-                        if ( donorTriplet.getSubjectCoref() != null ) {
-                            triplet.setSubjectCoref( donorTriplet.getSubjectCoref() );
-                        } else {
-                            triplet.setSubjectCoref( donorTriplet.getSubject() );
-                        }
+                        subject.setFieldCoref( donorTriplet.getSubject().getField() );
                     }
                 }
             }
