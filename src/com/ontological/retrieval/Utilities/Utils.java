@@ -1,6 +1,7 @@
 package com.ontological.retrieval.Utilities;
 
 import com.ontological.retrieval.DataTypes.Entity;
+import com.ontological.retrieval.DataTypes.Question;
 import com.ontological.retrieval.DataTypes.Triplet;
 import com.ontological.retrieval.DataTypes.TripletField;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
@@ -74,6 +75,16 @@ public class Utils
         return null;
     }
 
+    public static List<Entity> findEntitiesType( String type, List<Entity> entities  ) {
+        List<Entity> localEntities = new ArrayList<>();
+        for ( Entity en : entities ) {
+            if ( en.getType().equals( type ) ) {
+                localEntities.add( en );
+            }
+        }
+        return localEntities;
+    }
+
     public static boolean isNoun( Token tk ) {
         String text = tk.getCoveredText().toUpperCase();
         boolean isSingleValid = !text.equals( 'I' ) && text.length() == 1;
@@ -119,5 +130,20 @@ public class Utils
             out = out + element + separator;
         }
         return out;
+    }
+
+    public static boolean isRelationsCompatible( Triplet triplet, Question question ) {
+        for ( String qDependency : question.getRelationTypes() ) {
+            for ( String qRelation : question.getRelations( qDependency ) ) {
+                for ( String trDependency : triplet.getRelationTypes() ) {
+                    for ( Token trRelation : triplet.getRelations( trDependency ) ) {
+                        if ( trRelation.getLemma().getValue().toLowerCase().equals( qRelation ) ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

@@ -4,3 +4,4 @@ src/target/
 src/scripts/
 target/
 results/*
+samples/tmp/
