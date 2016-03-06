@@ -36,38 +36,60 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
             //          'object', but need to verify it.
             //
             triplet = new Triplet( aJCas, sentence );
-            triplet.setSubject( new TripletField( aJCas, entity.getName() ) );
-            String relation = entity.getParent().getName().getCoveredText();
+            TripletField subjectField = new TripletField( aJCas, entity.getName() );
+            parseProperties( subjectField, entity );
+            triplet.setSubject( subjectField );
             Entity innerEntity = Utils.findEntityType( "AUXPASS", entity.getParent().getChildren() );
             if ( innerEntity != null ) {
-                relation = innerEntity.getName().getCoveredText() + "_" + relation;
+                triplet.addRelation( innerEntity.getType(), innerEntity.getName() );
             }
-            triplet.setRelation( relation );
+            triplet.addRelation( entity.getType(), entity.getParent().getName() );
         } else if( entity.getType().equals( "NSUBJ" ) ) {
 
             triplet = new Triplet( aJCas, sentence );
-            triplet.setSubject( new TripletField( aJCas, entity.getName() ) );
+            TripletField subjectField = new TripletField( aJCas, entity.getName() );
+            parseProperties( subjectField, entity );
+            triplet.setSubject( subjectField );
             Entity dobjEntity = Utils.findEntityType( "DOBJ", entity.getParent().getChildren() );
             if ( dobjEntity != null ) {
-                triplet.setObject( new TripletField( aJCas, dobjEntity.getName() ) );
-                triplet.setRelation( entity.getParent().getName().getCoveredText() );
-            } else if ( entity.getParent().getName().getPos().getPosValue().equals( "NN" ) ){
-                triplet.setObject( new TripletField( aJCas, entity.getParent().getName() ) );
+                TripletField objectField = new TripletField( aJCas, dobjEntity.getName() );
+                parseProperties( objectField, entity );
+                triplet.setObject( objectField );
+                triplet.addRelation( dobjEntity.getType(), entity.getParent().getName() );
+            } else if ( isNoun( entity.getParent() ) ) {
+                TripletField objectField = new TripletField( aJCas, entity.getParent().getName() );
+                parseProperties( objectField, entity );
+                triplet.setObject( objectField );
             }
+            //
+            // fill multiple relations
             Entity copEntity = Utils.findEntityType( "COP", entity.getParent().getChildren() );
+            if ( copEntity != null ) {
+                triplet.addRelation( copEntity.getType(), copEntity.getName() );
+            }
             Entity negEntity = Utils.findEntityType( "NEG", entity.getParent().getChildren() );
-            if ( triplet.getRelation() == null && ( copEntity != null || negEntity != null ) ) {
-                String relation = "";
-                if ( copEntity != null ) {
-                    relation = copEntity.getName().getCoveredText();
+            if ( negEntity != null ) {
+                triplet.addRelation( negEntity.getType(), negEntity.getName() );
+            }
+            if ( triplet.getObject() == null && entity.getParent().getName().getPos().getPosValue().equals( "VB" ) ) {
+                triplet.addRelation( entity.getParent().getType(), entity.getParent().getName() );
+            }
+        } else if ( entity.getType().equals( "CONJ" ) ) {
+            if ( entity.getName().getPos().getPosValue().equals( "VBD" ) || entity.getName().getPos().getPosValue().equals( "VB" ) ) {
+                triplet = new Triplet( aJCas, sentence );
+                triplet.addRelation( entity.getType(), entity.getName() );
+                Entity nsubjEntity = Utils.findEntityType( "NSUBJ", entity.getParent().getChildren() );
+                if ( nsubjEntity != null ) {
+                    TripletField field = new TripletField( aJCas, nsubjEntity.getName() );
+                    parseProperties( field, nsubjEntity );
+                    triplet.setSubject( field );
                 }
-                if ( negEntity != null ) {
-                    relation += ( relation.isEmpty() ? negEntity.getName().getCoveredText() : ("_" + negEntity.getName().getCoveredText() ) );
+                Entity dobjEntity = Utils.findEntityType( "DOBJ", entity.getChildren() );
+                if ( dobjEntity != null ) {
+                    TripletField field = new TripletField( aJCas, dobjEntity.getName() );
+                    parseProperties( field, dobjEntity );
+                    triplet.setObject( field );
                 }
-                if ( triplet.getObject() == null && entity.getParent().getName().getPos().getPosValue().equals( "VB" ) ) {
-                    relation += "_" + entity.getParent().getName().getCoveredText();
-                }
-                triplet.setRelation( relation );
             }
         }
         if ( triplet != null ) {
@@ -100,6 +122,20 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
         }
         if ( triplet.getObject() != null ) {
             triplet.getObject().resolveCollisions();
+        }
+    }
+
+    private boolean isNoun( Entity entity ) {
+        return entity.getName().getPos().getPosValue().equals( "NN" ) ||
+                entity.getName().getPos().getPosValue().equals( "NNS" );
+    }
+
+    private void parseProperties( TripletField field, Entity entity ) {
+        for ( Entity en : Utils.findEntitiesType( "AMOD", entity.getChildren() ) ) {
+            field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, en.getName() );
+        }
+        for ( Entity en : Utils.findEntitiesType( "NN", entity.getChildren() ) ) {
+            field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, en.getName() );
         }
     }
 }

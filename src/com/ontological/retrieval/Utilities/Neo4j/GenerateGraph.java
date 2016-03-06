@@ -30,7 +30,7 @@ public class GenerateGraph
                 nodes.add( nd );
                 Entity parent = entity.getParent();
                 if ( parent != null ) {
-                    String rel = String.format( "_%d-[:%s]->_%d", entity.getBegin(), entity.getType(), parent.getBegin() );
+                    String rel = String.format( "(_%d)-[:%s]->(_%d)", entity.getBegin(), entity.getType(), parent.getBegin() );
                     relations.add( rel );
                 }
             }
@@ -71,7 +71,7 @@ public class GenerateGraph
             }
 
             if ( triplet.isValid() ) {
-                String rel = String.format("_%s-[:%s]->_%s", subjectId, triplet.getRelation(), objectId);
+                String rel = String.format("(_%s)-[:%s]->(_%s)", subjectId, triplet.formattedRelations(), objectId);
                 edges.add(rel);
             }
         }

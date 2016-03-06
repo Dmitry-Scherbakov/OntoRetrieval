@@ -3,6 +3,7 @@ package com.ontological.retrieval.AnalysisEngines;
 import com.ontological.retrieval.Utilities.Models;
 import com.ontological.retrieval.DataTypes.Question;
 import com.ontological.retrieval.DataTypes.Triplet;
+import com.ontological.retrieval.Utilities.Utils;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.component.JCasConsumer_ImplBase;
@@ -56,9 +57,8 @@ public class SimpleAnswerMatcher extends JCasConsumer_ImplBase
                         if ( !candidate.isValid() ) {
                             continue;
                         }
-                        candidate.print();
                         String candidateObject = candidate.getObject().getField().getLemma().getValue();
-                        if (    candidate.getRelation().equals( question.getRelation() ) &&
+                        if (    Utils.isRelationsCompatible( candidate, question ) &&
                                 candidateObject.equals( question.getObject() ) ) {
                             answers.add( candidate );
                             ++count;
@@ -69,14 +69,13 @@ public class SimpleAnswerMatcher extends JCasConsumer_ImplBase
                             break;
                         }
                     }
-                } else if ( Models.PR_WHAT.equals( question.getSubject().toUpperCase() ) ) {
+                } else if ( Models.PR_WHAT.equals( question.getSubject().toUpperCase() ) || Models.PR_WHICH.equals( question.getSubject().toUpperCase() ) ) {
                     for ( Triplet candidate : triplets ) {
                         if ( !candidate.isValid() ) {
                             continue;
                         }
-                        candidate.print();
                         String candidateSubject = candidate.getSubject().getField().getLemma().getValue();
-                        if (    candidate.getRelation().equals( question.getRelation() ) &&
+                        if (    Utils.isRelationsCompatible( candidate, question ) &&
                                 candidateSubject.equals( question.getObject() ) ) {
                             answers.add( candidate );
                             ++count;
@@ -92,7 +91,7 @@ public class SimpleAnswerMatcher extends JCasConsumer_ImplBase
         }
         System.out.println( "Answers: =>");
         for ( Triplet ansTriplet : answers ) {
-            System.out.println( ansTriplet.getContext() );
+            System.out.println( ansTriplet.getContext().getCoveredText() );
             ansTriplet.print();
         }
         System.out.println( "<=");

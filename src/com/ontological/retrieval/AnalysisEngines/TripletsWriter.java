@@ -45,6 +45,7 @@ public class TripletsWriter extends JCasConsumer_ImplBase
         try {
             writeTripletsGraph( aJCas );
             writeSentenceSemantic( aJCas );
+            writeTriplets( aJCas );
         } catch ( UnsupportedEncodingException ex ) {
             ex.printStackTrace();
         } catch ( FileNotFoundException ex ) {
@@ -78,6 +79,16 @@ public class TripletsWriter extends JCasConsumer_ImplBase
         if ( out.size() > 0 ) {
             try ( PrintWriter writer = new PrintWriter( senteceSemanticPath, FILE_ENCODING ) ) {
                 writer.write( Utils.listOfStringToString( out, "\n" ) );
+            }
+        }
+    }
+
+    private void writeTriplets( JCas aJCas ) {
+        for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
+            System.out.println( "Sentence: " + sentence.getCoveredText() );
+            for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
+                tr.print();
+                System.out.println();
             }
         }
     }

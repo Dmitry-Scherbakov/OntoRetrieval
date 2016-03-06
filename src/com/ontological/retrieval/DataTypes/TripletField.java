@@ -30,6 +30,7 @@ public class TripletField extends Annotation
 
     public static enum AttributeType {
         NAMED_ENTITY,
+        DESCRIPTION_ENTITY, // mostly, it is an 'adjective' entity.
         ABSTRACT_ENTITY,
 
         LAST
@@ -55,6 +56,7 @@ public class TripletField extends Annotation
         m_FieldId = Utils.TokenHash( m_FieldCoref );
 
         m_Attributes.put( AttributeType.NAMED_ENTITY, new ArrayList<>() );
+        m_Attributes.put( AttributeType.DESCRIPTION_ENTITY, new ArrayList<>() );
         m_Attributes.put( AttributeType.ABSTRACT_ENTITY, new ArrayList<>() );
     }
 

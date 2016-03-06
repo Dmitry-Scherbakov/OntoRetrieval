@@ -169,7 +169,9 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
                 object.setFieldCoref( corefDonor.getSubject().getField() );
             }
         }
-
+        //
+        // Cross validation for subject coreference
+        //
         if ( subject != null && subject.isValid() && !subject.isCoreference() && Models.isPronoun( triplet.getSubject().getCoveredText() ) ) {
             if ( Models.isPositionedPronoun( triplet.getSubject().getCoveredText() ) ) {
                 //
@@ -186,6 +188,29 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
                     Triplet donorTriplet = tripletsList.get( tripletsList.size() - 1 );
                     if ( donorTriplet.getScore().getMainPointsCount() <= 2 ) {
                         subject.setFieldCoref( donorTriplet.getSubject().getField() );
+                    }
+                }
+            }
+        }
+        //
+        // Cross validation for object coreference
+        //
+        if ( object != null && object.isValid() && !object.isCoreference() && Models.isPronoun( triplet.getObject().getCoveredText() ) ) {
+            if ( Models.isPositionedPronoun( triplet.getObject().getCoveredText() ) ) {
+                //
+                // Some pronouns should searched in a current sentence.
+                // The example of such pronoun is 'that'.
+                //
+                if ( prevTr_InCurrSent != null ) {
+                    TripletField prev = prevTr_InCurrSent.getSubject();
+                    object.setFieldCoref( prev.getField() );
+                }
+            } else if ( prevSentence != null ) {
+                List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
+                if ( tripletsList != null && tripletsList.size() > 0 ) {
+                    Triplet donorTriplet = tripletsList.get( tripletsList.size() - 1 );
+                    if ( donorTriplet.getScore().getMainPointsCount() <= 2 ) {
+                        object.setFieldCoref( donorTriplet.getSubject().getField() );
                     }
                 }
             }

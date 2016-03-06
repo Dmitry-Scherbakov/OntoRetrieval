@@ -21,7 +21,11 @@ public class Main {
 
 //    private static String DOCUMENT_PATH_ENG = "samples/en/encyclopedia/Angora-Goats.txt";
     private static String DOCUMENT_PATH_ENG = "samples/en/simple-pen.txt";
-    private static String QUESTIONS_PATH_ENG = "samples/en/questions/simple-pen-q.txt";
+//    private static String DOCUMENT_PATH_ENG = "samples/tmp/cpp.txt";
+//    private static String DOCUMENT_PATH_ENG = "samples/tmp/drm.txt";
+//    private static String QUESTIONS_PATH_ENG = "samples/en/questions/simple-pen-q.txt";
+    private static String QUESTIONS_PATH_ENG = "samples/tmp/drm_q.txt";
+//    private static String QUESTIONS_PATH_ENG = "samples/tmp/q_cpp.txt"
 //    private static String DOCUMENT_PATH_ENG = "samples/en/complicated-pen.txt";
     private static String DOCUMENT_PATH_RUS = "samples/ru/walt-disney-ru.txt";
 
@@ -73,7 +77,7 @@ public class Main {
                 createEngineDescription( StanfordLemmatizer.class ),
                 createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                 createEngineDescription( StanfordCoreferenceResolver.class ),
-                createEngineDescription( StanfordNamedEntityRecognizer.class ),
+//                createEngineDescription( StanfordNamedEntityRecognizer.class ),
                 createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ALL ),
                 createEngineDescription( TripletsWriter.class,
                         TripletsWriter.PARAM_TRIPLET_PATH, TripletsWriter.DEFAULT_TRIPLETS_PATH,

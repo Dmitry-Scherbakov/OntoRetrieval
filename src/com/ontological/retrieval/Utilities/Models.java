@@ -20,6 +20,7 @@ public class Models
     public static final String PR_WHO = "WHO";
 
     public static final String PR_WHAT = "WHAT";
+    public static final String PR_WHICH = "WHICH";
 
     static HashMap<Integer,String> m_PronounModel;
 
