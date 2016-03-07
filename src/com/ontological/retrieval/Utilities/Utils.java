@@ -132,6 +132,11 @@ public class Utils
         return out;
     }
 
+    //
+    // Now, it is only very simplified relations compatibility metric: if
+    // || relations_union( triplet_set, question_set ) || >= 1 then returns 'true',
+    // otherwise, 'false'.
+    // In future, this method could implement Cartesian product.
     public static boolean isRelationsCompatible( Triplet triplet, Question question ) {
         for ( String qDependency : question.getRelationTypes() ) {
             for ( String qRelation : question.getRelations( qDependency ) ) {
@@ -145,5 +150,36 @@ public class Utils
             }
         }
         return false;
+    }
+
+    public static boolean isNoun( Entity entity ) {
+        return  entity.getName().getPos().getPosValue().equals( "NN" ) ||
+                entity.getName().getPos().getPosValue().equals( "NNS" );
+    }
+
+    public static boolean isAdjective( Entity entity ) {
+        // 'ADJ' ?
+        return entity.getName().getPos().getPosValue().equals( "JJ" );
+    }
+
+    public static boolean isVerb( Entity entity ) {
+        return  entity.getName().getPos().getPosValue().equals( "VB" ) ||
+                entity.getName().getPos().getPosValue().equals( "VBD" ) ||
+                entity.getName().getPos().getPosValue().equals( "VBN" );
+    }
+
+    public static void parseProperties( TripletField field, Entity entity ) {
+        for ( Entity en : Utils.findEntitiesType( "AMOD", entity.getChildren() ) ) {
+            field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, en.getName() );
+            for ( Entity deepEn : Utils.findEntitiesType( "CONJ", en.getChildren() ) ) {
+                field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, deepEn.getName() );
+            }
+        }
+        for ( Entity en : Utils.findEntitiesType( "NN", entity.getChildren() ) ) {
+            field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, en.getName() );
+            for ( Entity deepEn : Utils.findEntitiesType( "CONJ", en.getChildren() ) ) {
+                field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, deepEn.getName() );
+            }
+        }
     }
 }

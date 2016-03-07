@@ -9,10 +9,12 @@ import com.ontological.retrieval.AnalysisEngines.SimpleAnswerMatcher;
 import com.ontological.retrieval.AnalysisEngines.TripletsExtractor;
 import com.ontological.retrieval.AnalysisEngines.TripletsWriter;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
+import de.tudarmstadt.ukp.dkpro.core.posfilter.PosFilter;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.*;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.treetagger.TreeTaggerPosTagger;
 import org.apache.uima.UIMAException;
+import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;
 
 import java.io.IOException;
@@ -20,12 +22,10 @@ import java.io.IOException;
 public class Main {
 
 //    private static String DOCUMENT_PATH_ENG = "samples/en/encyclopedia/Angora-Goats.txt";
-    private static String DOCUMENT_PATH_ENG = "samples/en/simple-pen.txt";
-//    private static String DOCUMENT_PATH_ENG = "samples/tmp/cpp.txt";
-//    private static String DOCUMENT_PATH_ENG = "samples/tmp/drm.txt";
+    private static String DOCUMENT_PATH_ENG = "samples/en/encyclopedia/Angora-Goats_small.txt";
+//    private static String DOCUMENT_PATH_ENG = "samples/tmp/ibm_small.txt";
+//    private static String DOCUMENT_PATH_ENG = "samples/en/simple-pen.txt";
 //    private static String QUESTIONS_PATH_ENG = "samples/en/questions/simple-pen-q.txt";
-    private static String QUESTIONS_PATH_ENG = "samples/tmp/drm_q.txt";
-//    private static String QUESTIONS_PATH_ENG = "samples/tmp/q_cpp.txt"
 //    private static String DOCUMENT_PATH_ENG = "samples/en/complicated-pen.txt";
     private static String DOCUMENT_PATH_RUS = "samples/ru/walt-disney-ru.txt";
 
@@ -71,9 +71,11 @@ public class Main {
                 TextReader.PARAM_SOURCE_LOCATION, path,
                 TextReader.PARAM_LANGUAGE, "en" );
 
+        AnalysisEngineDescription filter = createEngineDescription( PosFilter.class );
         runPipeline( readerDescription,
                 createEngineDescription( StanfordSegmenter.class ),
                 createEngineDescription( StanfordPosTagger.class ),
+//                createEngineDescription( filter ),
                 createEngineDescription( StanfordLemmatizer.class ),
                 createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                 createEngineDescription( StanfordCoreferenceResolver.class ),

@@ -68,6 +68,11 @@
         </dependency>
         <dependency>
             <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+            <artifactId>de.tudarmstadt.ukp.dkpro.core.posfilter-asl</artifactId>
+            <version>${dkpro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
             <artifactId>de.tudarmstadt.ukp.dkpro.core.treetagger-bin</artifactId>
             <version>20150325.0</version>
         </dependency>

@@ -11,7 +11,8 @@
             <features>
                 <featureDescription>
                     <name>attributes</name>
-                    <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+                    <rangeTypeName>uima.cas.FSList</rangeTypeName>
+                    <elementType>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</elementType>
                 </featureDescription>
 				<featureDescription>
                     <name>setFieldCoref</name>

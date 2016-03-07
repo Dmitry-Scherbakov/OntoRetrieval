@@ -125,6 +125,7 @@
     <orderEntry type="library" name="Maven: javax.json:javax.json-api:1.0" level="project" />
     <orderEntry type="library" name="Maven: de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.treetagger-asl:1.7.0" level="project" />
     <orderEntry type="library" name="Maven: org.annolab.tt4j:org.annolab.tt4j:1.2.1" level="project" />
+    <orderEntry type="library" name="Maven: de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.posfilter-asl:1.7.0" level="project" />
     <orderEntry type="library" name="Maven: de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.treetagger-bin:20150325.0" level="project" />
     <orderEntry type="library" name="Maven: de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.treetagger-model-tagger-ru-le:20140505.1" level="project" />
     <orderEntry type="library" name="Maven: de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.treetagger-upstream-tagger-ru-le:20140505" level="project" />

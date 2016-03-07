@@ -63,7 +63,7 @@ public class TripletField_Type extends Annotation_Type
     public int getAttributes( int addr )
     {
         if ( featOkTst && attributes_f == null ) {
-            jcas.throwFeatMissing("attributes", "uima.cas.FSArray");
+            jcas.throwFeatMissing("attributes", "uima.cas.FSList");
         }
         return ll_cas.ll_getRefValue( addr, attributes_code );
     }
@@ -71,7 +71,7 @@ public class TripletField_Type extends Annotation_Type
     public void addAttribute( int addr, int v )
     {
         if ( featOkTst && attributes_f == null ) {
-            jcas.throwFeatMissing("attributes", "uima.cas.FSArray");
+            jcas.throwFeatMissing("attributes", "uima.cas.FSList");
         }
         ll_cas.ll_setRefValue( addr, attributes_code, v );
     }
@@ -129,7 +129,7 @@ public class TripletField_Type extends Annotation_Type
         super(jcas, casType);
         casImpl.getFSClassRegistry().addGeneratorForType((TypeImpl) this.casType, getFSGenerator());
 
-        attributes_f = jcas.getRequiredFeatureDE(casType, "attributes", "uima.cas.FSArray", featOkTst);
+        attributes_f = jcas.getRequiredFeatureDE(casType, "attributes", "uima.cas.FSList", featOkTst);
         attributes_code = (null == attributes_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl) attributes_f).getCode();
 
         field_f = jcas.getRequiredFeatureDE(casType, "getField", "de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token", featOkTst);

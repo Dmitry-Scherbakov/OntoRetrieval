@@ -27,7 +27,7 @@
                 <featureDescription>
                     <name>relation</name>
                     <description>Relation of a triplet.</description>
-                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                    <rangeTypeName>uima.cas.FSList</rangeTypeName>
                 </featureDescription>
                 <featureDescription>
                     <name>isRelation</name>

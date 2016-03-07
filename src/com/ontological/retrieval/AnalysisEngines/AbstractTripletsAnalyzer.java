@@ -37,7 +37,7 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
             //
             triplet = new Triplet( aJCas, sentence );
             TripletField subjectField = new TripletField( aJCas, entity.getName() );
-            parseProperties( subjectField, entity );
+            Utils.parseProperties( subjectField, entity );
             triplet.setSubject( subjectField );
             Entity innerEntity = Utils.findEntityType( "AUXPASS", entity.getParent().getChildren() );
             if ( innerEntity != null ) {
@@ -45,20 +45,19 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
             }
             triplet.addRelation( entity.getType(), entity.getParent().getName() );
         } else if( entity.getType().equals( "NSUBJ" ) ) {
-
             triplet = new Triplet( aJCas, sentence );
             TripletField subjectField = new TripletField( aJCas, entity.getName() );
-            parseProperties( subjectField, entity );
+            Utils.parseProperties( subjectField, entity );
             triplet.setSubject( subjectField );
             Entity dobjEntity = Utils.findEntityType( "DOBJ", entity.getParent().getChildren() );
             if ( dobjEntity != null ) {
                 TripletField objectField = new TripletField( aJCas, dobjEntity.getName() );
-                parseProperties( objectField, entity );
+                Utils.parseProperties( objectField, dobjEntity );
                 triplet.setObject( objectField );
                 triplet.addRelation( dobjEntity.getType(), entity.getParent().getName() );
-            } else if ( isNoun( entity.getParent() ) ) {
+            } else if ( Utils.isNoun( entity.getParent() ) || Utils.isAdjective( entity.getParent() ) ) {
                 TripletField objectField = new TripletField( aJCas, entity.getParent().getName() );
-                parseProperties( objectField, entity );
+                Utils.parseProperties( objectField, entity.getParent() );
                 triplet.setObject( objectField );
             }
             //
@@ -71,8 +70,11 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
             if ( negEntity != null ) {
                 triplet.addRelation( negEntity.getType(), negEntity.getName() );
             }
-            if ( triplet.getObject() == null && entity.getParent().getName().getPos().getPosValue().equals( "VB" ) ) {
-                triplet.addRelation( entity.getParent().getType(), entity.getParent().getName() );
+            if ( triplet.getObject() == null && Utils.isVerb( entity.getParent() ) ) {
+                //
+                // It is a boosting for determination of relation type. Primary it MUST be 'entity.getParent().getType()'
+                String relation = ( entity.getParent().getType() == null ? entity.getType() : entity.getParent().getType() );
+                triplet.addRelation( relation, entity.getParent().getName() );
             }
         } else if ( entity.getType().equals( "CONJ" ) ) {
             if ( entity.getName().getPos().getPosValue().equals( "VBD" ) || entity.getName().getPos().getPosValue().equals( "VB" ) ) {
@@ -81,13 +83,13 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
                 Entity nsubjEntity = Utils.findEntityType( "NSUBJ", entity.getParent().getChildren() );
                 if ( nsubjEntity != null ) {
                     TripletField field = new TripletField( aJCas, nsubjEntity.getName() );
-                    parseProperties( field, nsubjEntity );
+                    Utils.parseProperties( field, nsubjEntity );
                     triplet.setSubject( field );
                 }
                 Entity dobjEntity = Utils.findEntityType( "DOBJ", entity.getChildren() );
                 if ( dobjEntity != null ) {
                     TripletField field = new TripletField( aJCas, dobjEntity.getName() );
-                    parseProperties( field, dobjEntity );
+                    Utils.parseProperties( field, dobjEntity );
                     triplet.setObject( field );
                 }
             }
@@ -119,23 +121,18 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
     protected void resolvePosCollisions( Triplet triplet ) {
         if ( triplet.getSubject() != null ) {
             triplet.getSubject().resolveCollisions();
+            if ( !triplet.getSubject().isValid() ) {
+                triplet.setSubject( null );
+            }
         }
-        if ( triplet.getObject() != null ) {
-            triplet.getObject().resolveCollisions();
-        }
-    }
-
-    private boolean isNoun( Entity entity ) {
-        return entity.getName().getPos().getPosValue().equals( "NN" ) ||
-                entity.getName().getPos().getPosValue().equals( "NNS" );
-    }
-
-    private void parseProperties( TripletField field, Entity entity ) {
-        for ( Entity en : Utils.findEntitiesType( "AMOD", entity.getChildren() ) ) {
-            field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, en.getName() );
-        }
-        for ( Entity en : Utils.findEntitiesType( "NN", entity.getChildren() ) ) {
-            field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, en.getName() );
-        }
+        // @note
+        // Looks like it is not effective to handle'object' field for POS exclusively.
+        // This could be Adjective and such case is ok: 'The city is big'.
+//        if ( triplet.getObject() != null ) {
+//            triplet.getObject().resolveCollisions();
+//            if ( !triplet.getObject().isValid() ) {
+//                triplet.setObject( null );
+//            }
+//        }
     }
 }
