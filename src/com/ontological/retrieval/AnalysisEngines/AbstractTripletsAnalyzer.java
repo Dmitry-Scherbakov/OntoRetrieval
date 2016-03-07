@@ -44,6 +44,7 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
                 triplet.addRelation( innerEntity.getType(), innerEntity.getName() );
             }
             triplet.addRelation( entity.getType(), entity.getParent().getName() );
+            Utils.parseDefinition( triplet, entity.getParent() );
         } else if( entity.getType().equals( "NSUBJ" ) ) {
             triplet = new Triplet( aJCas, sentence );
             TripletField subjectField = new TripletField( aJCas, entity.getName() );
@@ -55,10 +56,12 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
                 Utils.parseProperties( objectField, dobjEntity );
                 triplet.setObject( objectField );
                 triplet.addRelation( dobjEntity.getType(), entity.getParent().getName() );
+                Utils.parseDefinition( triplet, dobjEntity );
             } else if ( Utils.isNoun( entity.getParent() ) || Utils.isAdjective( entity.getParent() ) ) {
                 TripletField objectField = new TripletField( aJCas, entity.getParent().getName() );
                 Utils.parseProperties( objectField, entity.getParent() );
                 triplet.setObject( objectField );
+                Utils.parseDefinition( triplet, entity.getParent() );
             }
             //
             // fill multiple relations
@@ -75,6 +78,7 @@ abstract public class AbstractTripletsAnalyzer extends JCasConsumer_ImplBase
                 // It is a boosting for determination of relation type. Primary it MUST be 'entity.getParent().getType()'
                 String relation = ( entity.getParent().getType() == null ? entity.getType() : entity.getParent().getType() );
                 triplet.addRelation( relation, entity.getParent().getName() );
+                Utils.parseDefinition( triplet, entity.getParent() );
             }
         } else if ( entity.getType().equals( "CONJ" ) ) {
             if ( entity.getName().getPos().getPosValue().equals( "VBD" ) || entity.getName().getPos().getPosValue().equals( "VB" ) ) {

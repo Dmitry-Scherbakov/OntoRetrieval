@@ -30,6 +30,7 @@ public class Triplet extends Annotation
 
     private TripletField m_Subject;
     private TripletField m_Object;
+    private String m_Definition;
 
     private HashMap<String, List<Token>> m_Relations;
 
@@ -70,6 +71,10 @@ public class Triplet extends Annotation
 
     public void setScore( TripletScore score ) {
         m_Score = score;
+    }
+
+    public void setDefinition( String definition ) {
+        m_Definition = definition;
     }
 
     public TripletField getObject() {
@@ -158,10 +163,13 @@ public class Triplet extends Annotation
             }
         }
         if ( !subjectAttributes.isEmpty() ) {
-            System.out.println( "$ Subject attributes: [" + subjectAttributes + ']' );
+            System.out.println( "\t$ Subject attributes: [" + subjectAttributes + ']' );
         }
         if ( !objectAttributes.isEmpty() ) {
-            System.out.println( "$ Object attributes: [" + objectAttributes + ']' );
+            System.out.println( "\t$ Object attributes: [" + objectAttributes + ']' );
+        }
+        if ( m_Definition != null ) {
+            System.out.println( "\tDefinition: " + m_Definition );
         }
     }
 

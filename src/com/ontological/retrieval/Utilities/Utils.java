@@ -13,6 +13,7 @@ import org.apache.uima.jcas.JCas;
 import org.springframework.util.DigestUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -181,5 +182,49 @@ public class Utils
                 field.addAttribute( TripletField.AttributeType.DESCRIPTION_ENTITY, deepEn.getName() );
             }
         }
+    }
+
+    public static void parseDefinition( Triplet triplet, Entity entity ) {
+        final int DEFINITION_THRESHOLD = 1;
+//        System.out.println( "parseDefinition: " + entity.getName().getCoveredText() + '/' + entity.getType() );
+        HashMap<Integer, Integer> end = new HashMap<>(1);
+        end.put( 1, Constants.INVALID_VALUE );
+        flowEntity( 1, end, entity );
+        int localEnd = end.get( 1 ).intValue();
+        if ( localEnd != Constants.INVALID_VALUE ) {
+            int beginIndex = entity.getName().getEnd() - triplet.getBegin() + 1;
+            int endIndex = localEnd - triplet.getBegin();
+            if ( ( endIndex - beginIndex ) > DEFINITION_THRESHOLD ) {
+                String definition = triplet.getCoveredText().substring( beginIndex, endIndex );
+                triplet.setDefinition( definition );
+            }
+        }
+    }
+
+    private static void flowEntity( int level, HashMap<Integer, Integer> end, Entity entity ) {
+        for ( Entity en : entity.getChildren() ) {
+            if ( level == 1 && !( en.getType().equals( "PREP" ) || en.getType().equals( "XCOMP" ) ) ) {
+                //
+                // 'PREP'  -- prepositions ('but', 'between', 'for', 'of')
+                // 'XCOMP' -- open clauses ('to')
+                //
+                continue;
+            }
+            if ( isDefinitionAllowedDependency( en.getType() ) ) {
+                int localEnd = end.get( 1 ).intValue();
+                if ( en.getName().getEnd() > localEnd ) {
+                    end.put( 1, en.getName().getEnd() );
+                }
+                flowEntity( level + 1, end, en );
+            }
+        }
+    }
+
+    private static boolean isDefinitionAllowedDependency( String dependency ) {
+        return  dependency.equals( "PREP" )||
+                dependency.equals( "DET" ) ||
+                dependency.equals( "AMOD" )||
+                dependency.equals( "CONJ" )||
+                dependency.equals( "NN" );
     }
 }
