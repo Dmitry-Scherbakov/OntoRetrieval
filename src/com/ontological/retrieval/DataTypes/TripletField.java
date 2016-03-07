@@ -53,7 +53,7 @@ public class TripletField extends Annotation
         setEnd( token.getEnd() );
 
         m_Field = token;
-        m_FieldId = Utils.TokenHash( m_FieldCoref );
+        m_FieldId = Utils.TokenHash( m_Field );
 
         m_Attributes.put( AttributeType.NAMED_ENTITY, new ArrayList<>() );
         m_Attributes.put( AttributeType.DESCRIPTION_ENTITY, new ArrayList<>() );
@@ -119,6 +119,10 @@ public class TripletField extends Annotation
             List<Token> nes = getAttributes( AttributeType.NAMED_ENTITY );
             for( Token entity : nes ) {
                 field.addAttribute( AttributeType.NAMED_ENTITY, entity );
+            }
+            List<Token> desc = getAttributes( AttributeType.DESCRIPTION_ENTITY );
+            for( Token entity : desc ) {
+                field.addAttribute( AttributeType.DESCRIPTION_ENTITY, entity );
             }
             List<Token> abstr = getAttributes( AttributeType.ABSTRACT_ENTITY );
             for( Token entity : abstr ) {

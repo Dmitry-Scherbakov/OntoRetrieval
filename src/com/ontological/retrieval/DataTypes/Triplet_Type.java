@@ -111,18 +111,18 @@ public class Triplet_Type extends Annotation_Type
         ll_cas.ll_setRefValue( addr, score_code, v );
     }
 
-    public int getRelation( int addr )
+    public int getRelations( int addr )
     {
         if ( featOkTst && relation_f == null ) {
-            jcas.throwFeatMissing( "relation", "uima.cas.String" );
+            jcas.throwFeatMissing( "relation", "uima.cas.FSList" );
         }
         return ll_cas.ll_getRefValue( addr, relation_code );
     }
 
-    public void setRelation( int addr, int v )
+    public void addRelations( int addr, int v )
     {
         if ( featOkTst && relation_f == null ) {
-            jcas.throwFeatMissing( "relation", "uima.cas.String" );
+            jcas.throwFeatMissing( "relation", "uima.cas.FSList" );
         }
         ll_cas.ll_setRefValue( addr, relation_code, v );
     }
@@ -170,7 +170,7 @@ public class Triplet_Type extends Annotation_Type
         object_f = jcas.getRequiredFeatureDE(casType, "object", "com.ontological.retrieval.DataTypes.TripletField", featOkTst);
         object_code  = (null == object_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)object_f).getCode();
 
-        relation_f = jcas.getRequiredFeatureDE(casType, "relation", "uima.cas.String", featOkTst);
+        relation_f = jcas.getRequiredFeatureDE(casType, "relation", "uima.cas.FSList", featOkTst);
         relation_code  = (null == relation_f) ? JCas.INVALID_FEATURE_CODE : ((FeatureImpl)relation_f).getCode();
 
         isRelation_f = jcas.getRequiredFeatureDE(casType, "isRelation", "uima.cas.Boolean", featOkTst);

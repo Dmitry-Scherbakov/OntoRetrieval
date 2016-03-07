@@ -143,25 +143,25 @@ public class Triplet extends Annotation
         String objectAttributes = "";
         if ( getObject() != null ) {
             for ( Token tk : getObject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
-                if ( !subjectAttributes.isEmpty() ) {
-                    subjectAttributes += ',';
+                if ( !objectAttributes.isEmpty() ) {
+                    objectAttributes += ',';
                 }
-                subjectAttributes += tk.getCoveredText();
+                objectAttributes += tk.getCoveredText() + '/' + tk.getPos().getPosValue() + '/';
             }
         }
         if ( getSubject() != null ) {
             for ( Token tk : getSubject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
-                if ( !objectAttributes.isEmpty() ) {
-                    objectAttributes += ',';
+                if ( !subjectAttributes.isEmpty() ) {
+                    subjectAttributes += ',';
                 }
-                objectAttributes += tk.getCoveredText();
+                subjectAttributes += tk.getCoveredText() + '/' + tk.getPos().getPosValue() + '/';
             }
         }
         if ( !subjectAttributes.isEmpty() ) {
-            System.out.println( "$ Subject attributes: " + subjectAttributes );
+            System.out.println( "$ Subject attributes: [" + subjectAttributes + ']' );
         }
         if ( !objectAttributes.isEmpty() ) {
-            System.out.println( "$ Object attributes: " + objectAttributes );
+            System.out.println( "$ Object attributes: [" + objectAttributes + ']' );
         }
     }
 
