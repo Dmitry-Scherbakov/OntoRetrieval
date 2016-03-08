@@ -31,12 +31,10 @@ public class TripletField extends Annotation
     public static enum AttributeType {
         NAMED_ENTITY,
         DESCRIPTION_ENTITY, // mostly, it is an 'adjective' entity.
-        ABSTRACT_ENTITY,
-
-        LAST
+        ABSTRACT_ENTITY
     }
 
-    private HashMap<AttributeType, List<Token>> m_Attributes = new HashMap<>();
+    private HashMap<AttributeType, List<Object>> m_Attributes = new HashMap<>();
 
     private Token m_Field;
     private Token m_FieldCoref;
@@ -55,17 +53,17 @@ public class TripletField extends Annotation
         m_Field = token;
         m_FieldId = Utils.TokenHash( m_Field );
 
-        m_Attributes.put( AttributeType.NAMED_ENTITY, new ArrayList<>() );
-        m_Attributes.put( AttributeType.DESCRIPTION_ENTITY, new ArrayList<>() );
-        m_Attributes.put( AttributeType.ABSTRACT_ENTITY, new ArrayList<>() );
+        for ( AttributeType type : AttributeType.values() ) {
+            m_Attributes.put( type, new ArrayList<>() );
+        }
     }
 
-    public void addAttribute( AttributeType type, Token attribute ) {
-        List<Token> attributes = m_Attributes.get( type );
+    public void addAttribute( AttributeType type, Object attribute ) {
+        List<Object> attributes = m_Attributes.get( type );
         attributes.add( attribute );
     }
 
-    public List<Token> getAttributes( AttributeType type ) {
+    public List<Object> getAttributes( AttributeType type ) {
         return m_Attributes.get( type );
     }
 
@@ -116,17 +114,10 @@ public class TripletField extends Annotation
             if ( isCoreference() ) {
                 field.setFieldCoref( m_FieldCoref );
             }
-            List<Token> nes = getAttributes( AttributeType.NAMED_ENTITY );
-            for( Token entity : nes ) {
-                field.addAttribute( AttributeType.NAMED_ENTITY, entity );
-            }
-            List<Token> desc = getAttributes( AttributeType.DESCRIPTION_ENTITY );
-            for( Token entity : desc ) {
-                field.addAttribute( AttributeType.DESCRIPTION_ENTITY, entity );
-            }
-            List<Token> abstr = getAttributes( AttributeType.ABSTRACT_ENTITY );
-            for( Token entity : abstr ) {
-                field.addAttribute( AttributeType.ABSTRACT_ENTITY, entity );
+            for ( AttributeType type : AttributeType.values() ) {
+                for ( Object entity : getAttributes( type ) ) {
+                    field.addAttribute( type, entity );
+                }
             }
             return field;
         } catch ( CASException ex ) {

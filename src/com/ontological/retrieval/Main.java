@@ -79,7 +79,7 @@ public class Main {
                 createEngineDescription( StanfordLemmatizer.class ),
                 createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                 createEngineDescription( StanfordCoreferenceResolver.class ),
-//                createEngineDescription( StanfordNamedEntityRecognizer.class ),
+                createEngineDescription( StanfordNamedEntityRecognizer.class ),
                 createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ALL ),
                 createEngineDescription( TripletsWriter.class,
                         TripletsWriter.PARAM_TRIPLET_PATH, TripletsWriter.DEFAULT_TRIPLETS_PATH,
