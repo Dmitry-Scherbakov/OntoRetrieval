@@ -62,7 +62,8 @@ public class Main {
                 createEngineDescription( StanfordNamedEntityRecognizer.class ),
                 createEngineDescription( QuestionAnalyzer.class ),
                 createEngineDescription( TripletsWriter.class,
-                        TripletsWriter.PARAM_TRIPLET_PATH, "results/q_triplets.neo4j",
+                        TripletsWriter.PARAM_TRIPLETS_PATH, "results/q_triplets.neo4j",
+                        TripletsWriter.PARAM_TRIPLETS_MAP_PATH, "results/q_triplets-map.neo4j",
                         TripletsWriter.PARAM_SENTENCE_SEMANTIC_PATH, "results/q_sentence.semantic.log" ) );
     }
 
@@ -82,7 +83,8 @@ public class Main {
                 createEngineDescription( StanfordNamedEntityRecognizer.class ),
                 createEngineDescription( TripletsExtractor.class, TripletsExtractor.PARAM_FACTOR, TripletsExtractor.TripletValidationFactor.ALL ),
                 createEngineDescription( TripletsWriter.class,
-                        TripletsWriter.PARAM_TRIPLET_PATH, TripletsWriter.DEFAULT_TRIPLETS_PATH,
+                        TripletsWriter.PARAM_TRIPLETS_PATH, TripletsWriter.DEFAULT_TRIPLETS_PATH,
+                        TripletsWriter.PARAM_TRIPLETS_MAP_PATH, TripletsWriter.DEFAULT_TRIPLETS_MAP_PATH,
                         TripletsWriter.PARAM_SENTENCE_SEMANTIC_PATH, TripletsWriter.DEFAULT_SENTENCE_SEMANTIC_PATH ),
                 createEngineDescription( SimpleAnswerMatcher.class ) );
     }

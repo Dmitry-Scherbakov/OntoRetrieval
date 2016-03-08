@@ -13,8 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * @brief  This class implements data structure which describes information of main
+ *         triplets fields, like 'Subject' and 'Object'. Also, this class handles
+ *         'id' generation of this field, stores a set of attached attributes
+ *         (adjectives, named entities, etc) and store coreference information.
+ *
  * @author Dmitry Scherbakov
- * @email dm.scherbakov[_d0g_]yandex.ru
+ * @email  dm.scherbakov[_d0g_]yandex.ru
  */
 public class TripletField extends Annotation
 {

@@ -13,7 +13,7 @@ import org.apache.uima.jcas.tcas.Annotation_Type;
 
 /**
  * @author Dmitry Scherbakov
- * @email dm.scherbakov[_d0g_]yandex.ru
+ * @email  dm.scherbakov[_d0g_]yandex.ru
  */
 public class TripletField_Type extends Annotation_Type
 {

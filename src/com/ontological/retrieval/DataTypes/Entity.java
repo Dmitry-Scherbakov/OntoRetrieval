@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @brief  This lass implements the data structure of sentence-graph node.
+ *         The edge between the adjustment nodes (Entities) is a semantic
+ *         dependencies/relations. So, the object of this class is key point
+ *         for the sentence parsing (on the beginning step of parsing).
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */

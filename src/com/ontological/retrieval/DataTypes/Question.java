@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * @brief  This class implements the data structure for user query, which
+ *         must be used for searching the answer within the existing triplets-
+ *         graph. Object of this class will not be stored in a UIMA context, so
+ *         it is a local, context-independent system entity.
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov@yandex.ru
  */

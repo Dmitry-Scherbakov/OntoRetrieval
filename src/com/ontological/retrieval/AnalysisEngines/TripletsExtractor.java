@@ -17,6 +17,14 @@ import java.util.List;
 /**
  * @note   It is strongly recommended to use this extractor with the chain of StandfordParser
  *         which need to parametrize by StanfordParser.DependenciesMode.TREE.
+ *
+ * @brief  This class implements an algorithm of deep/parametric triplets extraction from
+ *         unstructured text data. The positive result of completed task of this class is
+ *         a set of extracted triplets, whcih will be stored in a UIMA index and attached
+ *         to a particular sentences.
+ *
+ * @out    Triplet[s] in Sentence[s]
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */
@@ -119,9 +127,6 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
     //
     // Now, it is very difficult to test matching Named Entities to an appropriate field/definition.
     // Try to test when enough data will be available.
-    // @todo
-    //      Add assigning to a definition, when the TripletDefinition class will be implemented.
-    //
     private void handleForNamedEntities( JCas aJCas ) {
         for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
             List<NamedEntity> namedEntities = new ArrayList<>();

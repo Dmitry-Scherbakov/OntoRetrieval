@@ -15,6 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @brief  This class implements the initial algorithm of user queries analysis.
+ *
+ * @todo
+ *         Need to implement the Query-Own semantic analysis (for short, questioned
+ *         contexts).
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */

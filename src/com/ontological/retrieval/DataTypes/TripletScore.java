@@ -12,6 +12,12 @@ import org.apache.uima.jcas.tcas.Annotation;
  */
 
 /**
+ * @brief  This class implements the logic of triplet scoring. The score value is
+ *         based on the linguistic entities extraction process, because of: the native
+ *         language is a very complex substance, and extraction process is a probabilistic
+ *         process. The accuracy of triplets extraction depends on: sentence length, main
+ *         points count, unresolved words relations and so on.
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov@yandex.ru
  */

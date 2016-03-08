@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @brief  This class implements the initial search metric.
+ *
+ * @todo
+ *         Need to reimplement in future.
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */
@@ -88,12 +93,11 @@ public class SimpleAnswerMatcher extends JCasConsumer_ImplBase
                     }
                 }
             }
+            System.out.println( "Answers: =>");
+            for ( Triplet ansTriplet : answers ) {
+                System.out.println( ansTriplet.toString() );
+            }
+            System.out.println( "<=");
         }
-        System.out.println( "Answers: =>");
-        for ( Triplet ansTriplet : answers ) {
-            System.out.println( ansTriplet.getContext().getCoveredText() );
-            ansTriplet.print();
-        }
-        System.out.println( "<=");
     }
 }

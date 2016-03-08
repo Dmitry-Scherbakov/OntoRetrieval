@@ -35,6 +35,7 @@ public class Models
             m_PronounModel.put( PR_THEY.hashCode(), PR_THEY );
             m_PronounModel.put( PR_THAT.hashCode(), PR_THAT );
             m_PronounModel.put( PR_THEM.hashCode(), PR_THEM );
+            // Is it (PR_WHO, PR_WHAT) really need to store here?
             m_PronounModel.put( PR_WHO.hashCode(), PR_WHO );
             m_PronounModel.put( PR_WHAT.hashCode(), PR_WHAT );
         }
