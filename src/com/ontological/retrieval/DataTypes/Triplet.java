@@ -1,5 +1,6 @@
 package com.ontological.retrieval.DataTypes;
 
+import de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import org.apache.uima.cas.CASException;
@@ -89,6 +90,10 @@ public class Triplet extends Annotation
         return m_Relations.get( dep );
     }
 
+    public TripletDefinition getDefinition() {
+        return m_Definition;
+    }
+
     public List<String> getRelationTypes() {
         List<String> list = new ArrayList<>();
         list.addAll( m_Relations.keySet() );
@@ -172,6 +177,17 @@ public class Triplet extends Annotation
         }
         if ( m_Definition != null ) {
             System.out.println( "\tDefinition: " + m_Definition.getCoveredText() );
+            List<NamedEntity> namedEntities = m_Definition.getNamedEntities();
+            if ( namedEntities != null ) {
+                String nEntities = "";
+                for ( NamedEntity nEn : namedEntities ) {
+                    if ( !nEntities.isEmpty() ) {
+                        nEntities += ',';
+                    }
+                    nEntities += '{' + nEn.getType().getShortName() + ':' + nEn.getCoveredText() + '}';
+                }
+                System.out.println( "\t\tDefinition named entities: [" + nEntities + ']' );
+            }
         }
     }
 

@@ -1,9 +1,6 @@
 package com.ontological.retrieval.AnalysisEngines;
 
-import com.ontological.retrieval.DataTypes.Entity;
-import com.ontological.retrieval.DataTypes.Triplet;
-import com.ontological.retrieval.DataTypes.TripletField;
-import com.ontological.retrieval.DataTypes.TripletScore;
+import com.ontological.retrieval.DataTypes.*;
 import com.ontological.retrieval.Utilities.*;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
 import de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity;
@@ -148,6 +145,12 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
                             if ( object.getBegin() >= nEntity.getBegin() && object.getEnd() <= nEntity.getEnd() ) {
                                 object.addAttribute( TripletField.AttributeType.NAMED_ENTITY, nEntity );
                                 System.out.println( "Matched named entity for object: " + nEntity.getCoveredText() );
+                            }
+                        }
+                        TripletDefinition definition = triplet.getDefinition();
+                        if ( definition != null ) {
+                            if ( nEntity.getBegin() >= definition.getBegin() && nEntity.getEnd() <= definition.getEnd() ) {
+                                definition.addNamedEntity( nEntity );
                             }
                         }
                     }
