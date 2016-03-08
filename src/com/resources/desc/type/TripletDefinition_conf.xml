@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <name>OntoRetrieval</name>
+    <description/>
+    <version>1.0</version>
+    <types>
+        <typeDescription>
+            <name>com.ontological.retrieval.DataTypes.TripletDefinition</name>
+            <description>None</description>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>getNamedEntities</name>
+                    <rangeTypeName>uima.cas.FSList</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+    </types>
+</typeSystemDescription>

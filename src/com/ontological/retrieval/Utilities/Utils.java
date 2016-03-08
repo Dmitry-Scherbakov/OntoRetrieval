@@ -1,13 +1,11 @@
 package com.ontological.retrieval.Utilities;
 
-import com.ontological.retrieval.DataTypes.Entity;
-import com.ontological.retrieval.DataTypes.Question;
-import com.ontological.retrieval.DataTypes.Triplet;
-import com.ontological.retrieval.DataTypes.TripletField;
+import com.ontological.retrieval.DataTypes.*;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.dependency.Dependency;
+import org.apache.uima.cas.CASException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.springframework.util.DigestUtils;
@@ -195,8 +193,12 @@ public class Utils
             int beginIndex = entity.getName().getEnd() - triplet.getBegin() + 1;
             int endIndex = localEnd - triplet.getBegin();
             if ( ( endIndex - beginIndex ) > DEFINITION_THRESHOLD ) {
-                String definition = triplet.getCoveredText().substring( beginIndex, endIndex );
-                triplet.setDefinition( definition );
+                try {
+                    TripletDefinition def = new TripletDefinition( triplet.getCAS().getJCas(), triplet, beginIndex, endIndex );
+                    triplet.setDefinition( def );
+                } catch ( CASException ex ) {
+                    System.out.println( "Exception, parseDefinition/CASException." );
+                }
             }
         }
     }
