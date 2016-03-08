@@ -147,7 +147,8 @@ public class Triplet extends Annotation
         String subjectAttributes = "";
         String objectAttributes = "";
         if ( getObject() != null ) {
-            for ( Token tk : getObject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
+            for ( Object obj : getObject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
+                Token tk = (Token)obj;
                 if ( !objectAttributes.isEmpty() ) {
                     objectAttributes += ',';
                 }
@@ -155,7 +156,8 @@ public class Triplet extends Annotation
             }
         }
         if ( getSubject() != null ) {
-            for ( Token tk : getSubject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
+            for ( Object obj : getSubject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
+                Token tk = (Token)obj;
                 if ( !subjectAttributes.isEmpty() ) {
                     subjectAttributes += ',';
                 }

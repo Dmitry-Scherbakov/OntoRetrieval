@@ -6,6 +6,7 @@ import com.ontological.retrieval.DataTypes.TripletField;
 import com.ontological.retrieval.DataTypes.TripletScore;
 import com.ontological.retrieval.Utilities.*;
 import de.tudarmstadt.ukp.dkpro.core.api.coref.type.CoreferenceLink;
+import de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.descriptor.ConfigurationParameter;
@@ -71,6 +72,7 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
         String language = aJCas.getDocumentLanguage();
         if ( language.equals( "en" ) ) {
             handleStandfordTree( aJCas );
+            handleForNamedEntities( aJCas );
         } else {
             System.out.println( "TripletsExtractor: currently, the only english language is supported." );
             throw new AnalysisEngineProcessException();
@@ -114,6 +116,43 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
             }
             prevSentence = sentence;
             prevTr_InCurrSent = null;
+        }
+    }
+
+    //
+    // Now, it is very difficult to test matching Named Entities to an appropriate field/definition.
+    // Try to test when enough data will be available.
+    // @todo
+    //      Add assigning to a definition, when the TripletDefinition class will be implemented.
+    //
+    private void handleForNamedEntities( JCas aJCas ) {
+        for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
+            List<NamedEntity> namedEntities = new ArrayList<>();
+            for ( NamedEntity namedEntity : JCasUtil.selectCovered( aJCas, NamedEntity.class, sentence ) ) {
+                namedEntities.add( namedEntity );
+            }
+            if ( namedEntities.size() > 0 ) {
+                for ( Triplet triplet : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
+                    // find intersections of triplets fields/definition and
+                    // named entities, to assign for the appropriate data
+                    for ( NamedEntity nEntity : namedEntities ) {
+                        TripletField subject = triplet.getSubject();
+                        if ( subject != null && !subject.isCoreference() ) {
+                            if ( subject.getBegin() >= nEntity.getBegin() && subject.getEnd() <= nEntity.getEnd() ) {
+                                subject.addAttribute( TripletField.AttributeType.NAMED_ENTITY, nEntity );
+                                System.out.println( "Matched named entity for subject: " + nEntity.getCoveredText() );
+                            }
+                        }
+                        TripletField object = triplet.getObject();
+                        if ( object != null && !object.isCoreference() ) {
+                            if ( object.getBegin() >= nEntity.getBegin() && object.getEnd() <= nEntity.getEnd() ) {
+                                object.addAttribute( TripletField.AttributeType.NAMED_ENTITY, nEntity );
+                                System.out.println( "Matched named entity for object: " + nEntity.getCoveredText() );
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

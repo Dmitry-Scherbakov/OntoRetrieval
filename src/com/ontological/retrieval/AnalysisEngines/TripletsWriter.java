@@ -45,7 +45,7 @@ public class TripletsWriter extends JCasConsumer_ImplBase
         try {
             writeTripletsGraph( aJCas );
             writeSentenceSemantic( aJCas );
-            writeTriplets( aJCas );
+//            writeTriplets( aJCas );
         } catch ( UnsupportedEncodingException ex ) {
             ex.printStackTrace();
         } catch ( FileNotFoundException ex ) {
