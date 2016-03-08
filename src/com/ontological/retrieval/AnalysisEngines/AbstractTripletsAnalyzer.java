@@ -12,6 +12,19 @@ import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence;
 import java.util.List;
 
 /**
+ * @brief  This class implements tha main sentence parsing algorithm for not-completed
+ *         triplets extraction. Only main field of triplets are filled in this class
+ *         (Subject, Relation[s], Object) in case of existing the appropriate data.
+ *
+ * @note
+ *         This parsing algorithm is applicable for 'normal' contexts. Normal context is
+ *         a standard structured sentence (e.g. a sentence from an article, a book and so on).
+ *
+ *         'Not-standard' sentence is a short context which includes specific structure.
+ *         Examples of such context are: tweets, SMS, postcard and so on.
+ *
+ *         So, the accuracy for non-standard context is not guaranteed.
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */

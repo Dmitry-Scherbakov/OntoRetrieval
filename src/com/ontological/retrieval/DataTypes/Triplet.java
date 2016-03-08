@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * @brief  This class implements the main structural object, which represent
+ *         the complex parametric linguistic 'Fact' (e.g. an RDF triplet is an
+ *         ideal example of such fact/data-structure). The different with RDF-
+ *         triplet is -- current triplet contains more/complex information.
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov@yandex.ru
  */
@@ -135,48 +140,35 @@ public class Triplet extends Annotation
         }
     }
 
-    public void print() {
-        String subject = ( m_Subject == null ? "" : m_Subject.getField().getLemma().getValue() );
-        String object = ( m_Object == null ? "" : m_Object.getField().getLemma().getValue() );
-        String sbjPosVal = ( m_Subject == null ? "" : m_Subject.getField().getPos().getPosValue() );
-        String objPosVal = ( m_Object == null ? "" : m_Object.getField().getPos().getPosValue() );
+    @Override
+    public String toString() {
+        Token subject = ( m_Subject == null ? null : m_Subject.getField() );
+        Token object =  ( m_Object == null ? null : m_Object.getField() );
 
-        System.out.printf( "[triplet] <%s%s>/%s/ _:%s <%s%s>/%s/\n",
-                subject, ( m_Subject != null && m_Subject.isCoreference() ? "$coref" : "" ), sbjPosVal,formattedRelations(),
-                object, ( m_Object != null && m_Object.isCoreference() ? "$coref" : "" ), objPosVal);
+        String result = String.format( "<%s%s>/%s/ _:%s <%s%s>/%s/\n",
+                ( subject == null ? "" : subject.getLemma().getValue() ),
+                ( m_Subject != null && m_Subject.isCoreference() ? "$coref" : "" ),
+                ( subject == null ? "" : subject.getPos().getPosValue() ), formattedRelations(),
+                ( object == null ? "" : object.getLemma().getValue() ),
+                ( m_Object != null && m_Object.isCoreference() ? "$coref" : "" ),
+                ( object == null ? "" : object.getPos().getPosValue() ) );
 
-        //
-        // @todo
-        //      Add check for PoS: it must be adjective or noun.
-        //
-        String subjectAttributes = "";
-        String objectAttributes = "";
-        if ( getObject() != null ) {
-            for ( Object obj : getObject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
-                Token tk = (Token)obj;
-                if ( !objectAttributes.isEmpty() ) {
-                    objectAttributes += ',';
-                }
-                objectAttributes += tk.getCoveredText() + '/' + tk.getPos().getPosValue() + '/';
-            }
-        }
         if ( getSubject() != null ) {
-            for ( Object obj : getSubject().getAttributes( TripletField.AttributeType.DESCRIPTION_ENTITY ) ) {
-                Token tk = (Token)obj;
-                if ( !subjectAttributes.isEmpty() ) {
-                    subjectAttributes += ',';
-                }
-                subjectAttributes += tk.getCoveredText() + '/' + tk.getPos().getPosValue() + '/';
+            String sbjAttrs = fieldAttributesToString( getSubject() );
+            if ( !sbjAttrs.isEmpty() ) {
+                result += "\tSubj_attrs: " + sbjAttrs + '\n';
             }
         }
-        if ( !subjectAttributes.isEmpty() ) {
-            System.out.println( "\t$ Subject attributes: [" + subjectAttributes + ']' );
+
+        if ( getObject() != null ) {
+            String objAttrs = fieldAttributesToString( getObject() );
+            if ( !objAttrs.isEmpty() ) {
+                result += "\tObj_attrs: " + objAttrs + '\n';
+            }
         }
-        if ( !objectAttributes.isEmpty() ) {
-            System.out.println( "\t$ Object attributes: [" + objectAttributes + ']' );
-        }
+
         if ( m_Definition != null ) {
-            System.out.println( "\tDefinition: " + m_Definition.getCoveredText() );
+            result += "\tDefinition: " + m_Definition.getCoveredText() + '\n';
             List<NamedEntity> namedEntities = m_Definition.getNamedEntities();
             if ( namedEntities != null ) {
                 String nEntities = "";
@@ -186,9 +178,11 @@ public class Triplet extends Annotation
                     }
                     nEntities += '{' + nEn.getType().getShortName() + ':' + nEn.getCoveredText() + '}';
                 }
-                System.out.println( "\t\tDefinition named entities: [" + nEntities + ']' );
+                result += "\t\tDefinition named entities: [" + nEntities + "]\n";
             }
         }
+
+        return "# " + m_Context.getCoveredText() + '\n' + "# <Subject>/POS/ _:{Dependency:relation} <Object>/POS/\n" + result;
     }
 
     public String formattedRelations() {
@@ -207,5 +201,33 @@ public class Triplet extends Annotation
             }
         }
         return '[' + relation + ']';
+    }
+
+    private String fieldAttributesToString( TripletField field ) {
+        String result = "";
+        for ( TripletField.AttributeType type : TripletField.AttributeType.values() ) {
+            String deep = "";
+            for ( Object object : field.getAttributes( type ) ) {
+                if ( !deep.isEmpty() ) {
+                    deep += ',';
+                }
+                if ( object instanceof NamedEntity ) {
+                    deep += ((NamedEntity) object).getCoveredText();
+                } else if ( object instanceof Token ) {
+                    Token tk = (Token) object;
+                    deep += tk.getLemma().getValue() + '/' + tk.getPos().getPosValue() + '/';
+                } else {
+                    System.out.println( "Error: [Triplet/fieldAttributesToString], undetermined attribute type." );
+                    deep += object.toString();
+                }
+            }
+            if ( !deep.isEmpty() ) {
+                if ( !result.isEmpty() ) {
+                    result += ',';
+                }
+                result += '{' + type.toString() + ':' + deep + '}';
+            }
+        }
+        return result;
     }
 }

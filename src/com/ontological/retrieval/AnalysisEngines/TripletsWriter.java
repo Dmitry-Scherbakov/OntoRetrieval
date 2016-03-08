@@ -18,26 +18,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @brief  This class implements a set of algorithms which purpose is to write resulted extracted
+ *         data to a file storage. Now, there is implemented:
+ *
+ *         - writing sentence-semantic-structure (sentence graph), this structure is coded by a
+ *         script for Neo4j DB, so, to visualize this structure use Neo4j DB and his web-emulator;
+ *         - writing the full graph of all extracted triplets, this structure is also coded by a
+ *         script for Neo4j DB;
+ *
  * @author Dmitry Scherbakov
  * @email  dm.scherbakov[_d0g_]yandex.ru
  */
 public class TripletsWriter extends JCasConsumer_ImplBase
 {
     private static final String FILE_ENCODING = "UTF-8";
-    public static final String DEFAULT_TRIPLETS_PATH = "results/triplets.neo4j";
+    public static final String DEFAULT_TRIPLETS_PATH = "results/triplets.log";
+    public static final String DEFAULT_TRIPLETS_MAP_PATH = "results/triplets-map.neo4j";
     public static final String DEFAULT_SENTENCE_SEMANTIC_PATH = "results/sentence.semantic.log";
 
     public static final String PARAM_SINGLETON = "singleton";
     @ConfigurationParameter(name = PARAM_SINGLETON, defaultValue = "true", mandatory = true)
     private boolean singleton;
 
-    public static final String PARAM_TRIPLET_PATH = "tripletsPath";
-    @ConfigurationParameter(name = PARAM_TRIPLET_PATH, mandatory = false, defaultValue = DEFAULT_TRIPLETS_PATH)
+    public static final String PARAM_TRIPLETS_PATH = "tripletsPath";
+    @ConfigurationParameter(name = PARAM_TRIPLETS_PATH, mandatory = false, defaultValue = DEFAULT_TRIPLETS_PATH)
     protected String tripletsPath;
 
-    public static final String PARAM_SENTENCE_SEMANTIC_PATH = "senteceSemanticPath";
+    public static final String PARAM_TRIPLETS_MAP_PATH = "tripletsMapPath";
+    @ConfigurationParameter(name = PARAM_TRIPLETS_MAP_PATH, mandatory = false, defaultValue = DEFAULT_TRIPLETS_MAP_PATH)
+    protected String tripletsMapPath;
+
+    public static final String PARAM_SENTENCE_SEMANTIC_PATH = "sentenceSemanticPath";
     @ConfigurationParameter(name = PARAM_SENTENCE_SEMANTIC_PATH, mandatory = false, defaultValue = DEFAULT_SENTENCE_SEMANTIC_PATH)
-    protected String senteceSemanticPath;
+    protected String sentenceSemanticPath;
 
     @Override
     public void process( JCas aJCas ) throws AnalysisEngineProcessException {
@@ -46,6 +59,7 @@ public class TripletsWriter extends JCasConsumer_ImplBase
             writeTripletsGraph( aJCas );
             writeSentenceSemantic( aJCas );
             writeTriplets( aJCas );
+            printTriplets( aJCas );
         } catch ( UnsupportedEncodingException ex ) {
             ex.printStackTrace();
         } catch ( FileNotFoundException ex ) {
@@ -61,7 +75,7 @@ public class TripletsWriter extends JCasConsumer_ImplBase
             }
         }
         if ( triplets.size() > 0 ) {
-            try ( PrintWriter writer = new PrintWriter( tripletsPath, FILE_ENCODING ) ) {
+            try ( PrintWriter writer = new PrintWriter( tripletsMapPath, FILE_ENCODING ) ) {
                 writer.write( GenerateGraph.generateTripletsGraph( triplets ) );
             }
         }
@@ -77,18 +91,32 @@ public class TripletsWriter extends JCasConsumer_ImplBase
             }
         }
         if ( out.size() > 0 ) {
-            try ( PrintWriter writer = new PrintWriter( senteceSemanticPath, FILE_ENCODING ) ) {
+            try ( PrintWriter writer = new PrintWriter( sentenceSemanticPath, FILE_ENCODING ) ) {
                 writer.write( Utils.listOfStringToString( out, "\n" ) );
             }
         }
     }
 
-    private void writeTriplets( JCas aJCas ) {
+    private void writeTriplets( JCas aJCas ) throws FileNotFoundException, UnsupportedEncodingException  {
+        List<Triplet> triplets = new ArrayList<>();
         for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
-            System.out.println( "Sentence: " + sentence.getCoveredText() );
             for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
-                tr.print();
-                System.out.println();
+                triplets.add( tr );
+            }
+        }
+        if ( triplets.size() > 0 ) {
+            try ( PrintWriter writer = new PrintWriter( tripletsPath, FILE_ENCODING ) ) {
+                for ( Triplet triplet : triplets ) {
+                    writer.write( triplet.toString() + '\n' );
+                }
+            }
+        }
+    }
+
+    private void printTriplets( JCas aJCas ) {
+        for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
+            for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
+                System.out.println( tr.toString() + '\n' );
             }
         }
     }
