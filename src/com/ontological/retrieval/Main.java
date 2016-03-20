@@ -8,6 +8,7 @@ import com.ontological.retrieval.AnalysisEngines.QuestionAnalyzer;
 import com.ontological.retrieval.AnalysisEngines.SimpleAnswerMatcher;
 import com.ontological.retrieval.AnalysisEngines.TripletsExtractor;
 import com.ontological.retrieval.AnalysisEngines.TripletsWriter;
+import com.ontological.retrieval.Normalization.TextNormalizer;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
 import de.tudarmstadt.ukp.dkpro.core.posfilter.PosFilter;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.*;
@@ -31,19 +32,26 @@ public class Main {
 
     public static void main( String[] args ) throws Exception {
         boolean isRussian = false;
-        try {
-            if ( isRussian ) {
-                parseRussianCorpus( DOCUMENT_PATH_RUS );
-            } else { // english
+        String path = ( isRussian ? DOCUMENT_PATH_RUS : DOCUMENT_PATH_ENG );
+        TextNormalizer normalizer = new TextNormalizer( TextNormalizer.Language.EN, path, "results" );
+        System.out.println( "Start text normalization." );
+        if ( normalizer.normalize() ) {
+            System.out.println( "Text normalization finished." );
+            path = normalizer.getNormalizedPath();
+            try {
+                if ( isRussian ) {
+                    parseRussianCorpus( path );
+                } else { // english
 //                parseEnglishQuestions( QUESTIONS_PATH_ENG );
-                parseEnglishCorpus( DOCUMENT_PATH_ENG );
+                    parseEnglishCorpus( path );
+                }
+            } catch ( UIMAException ex ) {
+                System.out.print("UIMAException: " + ex.toString());
+                ex.printStackTrace();
+            } catch ( IOException ex ) {
+                System.out.print("IOException: " + ex.toString());
+                ex.printStackTrace();
             }
-        } catch ( UIMAException ex ) {
-            System.out.print("UIMAException: " + ex.toString());
-            ex.printStackTrace();
-        } catch ( IOException ex ) {
-            System.out.print("IOException: " + ex.toString());
-            ex.printStackTrace();
         }
         System.out.println( "Finished" );
     }

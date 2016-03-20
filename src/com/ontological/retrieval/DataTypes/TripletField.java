@@ -1,5 +1,6 @@
 package com.ontological.retrieval.DataTypes;
 
+import com.ontological.retrieval.Utilities.Models;
 import com.ontological.retrieval.Utilities.Utils;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import org.apache.uima.cas.CASException;
@@ -42,7 +43,7 @@ public class TripletField extends Annotation
     private HashMap<AttributeType, List<Object>> m_Attributes = new HashMap<>();
 
     private Token m_Field;
-    private Token m_FieldCoref;
+    private TripletField m_FieldCoref;
     private String m_FieldId;
 
     public TripletField( int addr, TOP_Type type ) {
@@ -72,15 +73,15 @@ public class TripletField extends Annotation
         return m_Attributes.get( type );
     }
 
-    public void setFieldCoref( Token coref ) {
+    public void setFieldCoref( TripletField coref ) {
         m_FieldCoref = coref;
-        m_FieldId = Utils.TokenHash( m_FieldCoref );
-        setBegin( coref.getBegin() );
-        setEnd( coref.getEnd() );
+        m_FieldId = Utils.TokenHash( m_FieldCoref.getField() );
+        setBegin( m_FieldCoref.getField().getBegin() );
+        setEnd( m_FieldCoref.getField().getEnd() );
     }
 
     public Token getField() {
-        return isCoreference() ? m_FieldCoref : m_Field;
+        return isCoreference() ? m_FieldCoref.getField() : m_Field;
     }
 
     public boolean isCoreference() {
@@ -97,7 +98,7 @@ public class TripletField extends Annotation
 
     public void resolveCollisions() {
         if ( m_FieldCoref != null ) {
-            if ( !Utils.isNoun( m_FieldCoref ) ) {
+            if ( !Utils.isNoun( m_FieldCoref.getField() ) ) {
                 m_FieldCoref = null;
             }
         }
@@ -111,6 +112,10 @@ public class TripletField extends Annotation
             setBegin( getField().getBegin() );
             setEnd( getField().getEnd() );
         }
+    }
+
+    public boolean isBaseFieldPositioned() {
+        return Models.isPositionedPronoun( m_Field.getCoveredText() );
     }
 
     public TripletField clone() {
