@@ -213,7 +213,7 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
             CoreferenceLink corefEn = corefLinks.get( triplet.getObject().getBegin() );
             Triplet corefDonor = Utils.findTriplet( aJCas, corefEn, prevSentence );
             if ( corefDonor != null ) {
-                object.setFieldCoref( corefDonor.getSubject().getField() );
+                object.setFieldCoref( corefDonor.getSubject() );
             }
         }
         //
@@ -226,15 +226,23 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
                 // The example of such pronoun is 'that'.
                 //
                 if ( prevTr_InCurrSent != null ) {
-                    TripletField prev = prevTr_InCurrSent.getSubject();
-                    subject.setFieldCoref( prev.getField() );
+                    if ( prevTr_InCurrSent.getSubject() != null && prevTr_InCurrSent.getSubject().isBaseFieldPositioned() ) {
+                        //
+                        // This case resolve coreference when 'that' is duplicated, so for multiple 'that's.
+                        subject.setFieldCoref( prevTr_InCurrSent.getSubject() );
+                    } else {
+                        //
+                        // This is the main case, when a sentence contain only a single 'that', so coreference will be
+                        // resolved by substitution of prev triplet object.
+                        subject.setFieldCoref( prevTr_InCurrSent.getObject() != null ? prevTr_InCurrSent.getObject() : prevTr_InCurrSent.getSubject() );
+                    }
                 }
             } else if ( prevSentence != null ) {
                 List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
                 if ( tripletsList != null && tripletsList.size() > 0 ) {
                     Triplet donorTriplet = tripletsList.get( tripletsList.size() - 1 );
                     if ( donorTriplet.getScore().getMainPointsCount() <= 2 ) {
-                        subject.setFieldCoref( donorTriplet.getSubject().getField() );
+                        subject.setFieldCoref( donorTriplet.getSubject() );
                     }
                 }
             }
@@ -250,14 +258,20 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
                 //
                 if ( prevTr_InCurrSent != null ) {
                     TripletField prev = prevTr_InCurrSent.getSubject();
-                    object.setFieldCoref( prev.getField() );
+                    object.setFieldCoref( prev );
                 }
             } else if ( prevSentence != null ) {
                 List<Triplet> tripletsList = JCasUtil.selectCovered( aJCas, Triplet.class, prevSentence );
                 if ( tripletsList != null && tripletsList.size() > 0 ) {
                     Triplet donorTriplet = tripletsList.get( tripletsList.size() - 1 );
                     if ( donorTriplet.getScore().getMainPointsCount() <= 2 ) {
-                        object.setFieldCoref( donorTriplet.getSubject().getField() );
+                        if ( object.getField().equals( Models.PR_THAT ) ) {
+                            // @note need to check this case
+                            // @example Sentence: "That was quite simple"
+                            object.setFieldCoref( donorTriplet.getObject() );
+                        } else {
+                            object.setFieldCoref( donorTriplet.getSubject() );
+                        }
                     }
                 }
             }

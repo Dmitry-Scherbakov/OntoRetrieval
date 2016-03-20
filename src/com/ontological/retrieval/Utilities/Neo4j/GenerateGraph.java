@@ -3,6 +3,7 @@ package com.ontological.retrieval.Utilities.Neo4j;
 import com.ontological.retrieval.Utilities.Constants;
 import com.ontological.retrieval.DataTypes.Entity;
 import com.ontological.retrieval.DataTypes.Triplet;
+import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 
 import java.util.*;
 
@@ -71,7 +72,7 @@ public class GenerateGraph
             }
 
             if ( triplet.isValid() ) {
-                String rel = String.format("(_%s)-[:%s]->(_%s)", subjectId, triplet.formattedRelations(), objectId);
+                String rel = String.format("(_%s)-[:%s]->(_%s)", subjectId, getReadableRelation( triplet ), objectId);
                 edges.add(rel);
             }
         }
@@ -105,5 +106,20 @@ public class GenerateGraph
             return triplet.getSubject().getField().getLemma().getValue();
         }
         return null;
+    }
+
+    private static String getReadableRelation( Triplet triplet ) {
+        String relation = "";
+        if ( triplet.isRelation() ) {
+            for ( String dependency : triplet.getRelationTypes() ) {
+                for ( Token rel : triplet.getRelations( dependency ) ) {
+                    if ( !relation.isEmpty() ) {
+                        relation += '_';
+                    }
+                    relation += rel.getCoveredText();
+                }
+            }
+        }
+        return relation;
     }
 }
