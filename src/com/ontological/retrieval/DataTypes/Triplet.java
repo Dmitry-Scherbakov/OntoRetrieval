@@ -203,7 +203,7 @@ public class Triplet extends Annotation
         return '[' + relation + ']';
     }
 
-    private String fieldAttributesToString( TripletField field ) {
+    static public String fieldAttributesToString( TripletField field ) {
         String result = "";
         for ( TripletField.AttributeType type : TripletField.AttributeType.values() ) {
             String deep = "";
