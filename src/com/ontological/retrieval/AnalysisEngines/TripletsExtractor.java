@@ -124,9 +124,6 @@ public class TripletsExtractor extends AbstractTripletsAnalyzer
         }
     }
 
-    //
-    // Now, it is very difficult to test matching Named Entities to an appropriate field/definition.
-    // Try to test when enough data will be available.
     private void handleForNamedEntities( JCas aJCas ) {
         for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
             List<NamedEntity> namedEntities = new ArrayList<>();
