@@ -203,6 +203,15 @@ public class Utils
         }
     }
 
+    public static int tokensCount( JCas aJCas, Sentence sentence ) {
+        int count = 0;
+        List<Token> lst = JCasUtil.selectCovered( aJCas, Token.class, sentence );
+        if ( lst != null ) {
+            count = lst.size();
+        }
+        return count;
+    }
+
     private static void flowEntity( int level, HashMap<Integer, Integer> end, Entity entity ) {
         for ( Entity en : entity.getChildren() ) {
             if ( level == 1 && !( en.getType().equals( "PREP" ) || en.getType().equals( "XCOMP" ) ) ) {

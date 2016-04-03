@@ -52,14 +52,22 @@ public class TripletsWriter extends JCasConsumer_ImplBase
     @ConfigurationParameter(name = PARAM_SENTENCE_SEMANTIC_PATH, mandatory = false, defaultValue = DEFAULT_SENTENCE_SEMANTIC_PATH)
     protected String sentenceSemanticPath;
 
+    private long m_TripletsCount;
+    private long m_SentenceCount;
+    private long m_TokensCount;
+
     @Override
     public void process( JCas aJCas ) throws AnalysisEngineProcessException {
         System.out.println( "Started TripletsWriter" );
+        m_TripletsCount = 0;
+        m_SentenceCount = 0;
+        m_TokensCount = 0;
         try {
             writeTripletsGraph( aJCas );
             writeSentenceSemantic( aJCas );
             writeTriplets( aJCas );
-            printTriplets( aJCas );
+//            printTriplets( aJCas );
+            printStatistic( aJCas );
         } catch ( UnsupportedEncodingException ex ) {
             ex.printStackTrace();
         } catch ( FileNotFoundException ex ) {
@@ -70,11 +78,14 @@ public class TripletsWriter extends JCasConsumer_ImplBase
     private void writeTripletsGraph( JCas aJCas ) throws FileNotFoundException, UnsupportedEncodingException {
         List<Triplet> triplets = new ArrayList<>();
         for ( Sentence sentence : JCasUtil.select( aJCas, Sentence.class ) ) {
+            ++m_SentenceCount;
+            m_TokensCount += Utils.tokensCount( aJCas, sentence );
             for ( Triplet tr : JCasUtil.selectCovered( aJCas, Triplet.class, sentence ) ) {
                 triplets.add( tr );
             }
         }
-        if ( triplets.size() > 0 ) {
+        m_TripletsCount = triplets.size();
+        if ( m_TripletsCount > 0 ) {
             try ( PrintWriter writer = new PrintWriter( tripletsMapPath, FILE_ENCODING ) ) {
                 writer.write( GenerateGraph.generateTripletsGraph( triplets ) );
             }
@@ -119,5 +130,10 @@ public class TripletsWriter extends JCasConsumer_ImplBase
                 System.out.println( tr.toString() + '\n' );
             }
         }
+    }
+
+    private void printStatistic( JCas aJCas ) {
+        System.out.printf( "Document length [%d], sentence count [%d], tokens count [%d]. Extracted triplets count [%d].\n",
+                aJCas.getDocumentText().length(), m_SentenceCount, m_TokensCount, m_TripletsCount );
     }
 }

@@ -10,12 +10,10 @@ import com.ontological.retrieval.AnalysisEngines.TripletsExtractor;
 import com.ontological.retrieval.AnalysisEngines.TripletsWriter;
 import com.ontological.retrieval.Normalization.TextNormalizer;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
-import de.tudarmstadt.ukp.dkpro.core.posfilter.PosFilter;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.*;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.treetagger.TreeTaggerPosTagger;
 import org.apache.uima.UIMAException;
-import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;
 
 import java.io.IOException;
@@ -23,6 +21,7 @@ import java.io.IOException;
 public class Main {
 
 //    private static String DOCUMENT_PATH_ENG = "samples/en/encyclopedia/Angora-Goats.txt";
+//    private static String DOCUMENT_PATH_ENG = "samples/en/dirty-data/harry-potter.txt";
     private static String DOCUMENT_PATH_ENG = "samples/en/encyclopedia/Angora-Goats_small.txt";
 //    private static String DOCUMENT_PATH_ENG = "samples/tmp/ibm_small.txt";
 //    private static String DOCUMENT_PATH_ENG = "samples/en/simple-pen.txt";
@@ -31,6 +30,7 @@ public class Main {
     private static String DOCUMENT_PATH_RUS = "samples/ru/walt-disney-ru.txt";
 
     public static void main( String[] args ) throws Exception {
+        long beginTime = System.currentTimeMillis();
         boolean isRussian = false;
         String path = ( isRussian ? DOCUMENT_PATH_RUS : DOCUMENT_PATH_ENG );
         TextNormalizer normalizer = new TextNormalizer( TextNormalizer.Language.EN, path, "results" );
@@ -53,7 +53,7 @@ public class Main {
                 ex.printStackTrace();
             }
         }
-        System.out.println( "Finished" );
+        System.out.printf( "Finished. Duration is %d seconds.", ( System.currentTimeMillis() - beginTime ) / 1000 );
     }
 
     static private void parseEnglishQuestions( String path ) throws UIMAException, IOException {
@@ -80,11 +80,9 @@ public class Main {
                 TextReader.PARAM_SOURCE_LOCATION, path,
                 TextReader.PARAM_LANGUAGE, "en" );
 
-        AnalysisEngineDescription filter = createEngineDescription( PosFilter.class );
         runPipeline( readerDescription,
                 createEngineDescription( StanfordSegmenter.class ),
                 createEngineDescription( StanfordPosTagger.class ),
-//                createEngineDescription( filter ),
                 createEngineDescription( StanfordLemmatizer.class ),
                 createEngineDescription( StanfordParser.class, StanfordParser.PARAM_MODE, StanfordParser.DependenciesMode.TREE ),
                 createEngineDescription( StanfordCoreferenceResolver.class ),
@@ -93,8 +91,8 @@ public class Main {
                 createEngineDescription( TripletsWriter.class,
                         TripletsWriter.PARAM_TRIPLETS_PATH, TripletsWriter.DEFAULT_TRIPLETS_PATH,
                         TripletsWriter.PARAM_TRIPLETS_MAP_PATH, TripletsWriter.DEFAULT_TRIPLETS_MAP_PATH,
-                        TripletsWriter.PARAM_SENTENCE_SEMANTIC_PATH, TripletsWriter.DEFAULT_SENTENCE_SEMANTIC_PATH ),
-                createEngineDescription( SimpleAnswerMatcher.class ) );
+                        TripletsWriter.PARAM_SENTENCE_SEMANTIC_PATH, TripletsWriter.DEFAULT_SENTENCE_SEMANTIC_PATH )/*,
+                createEngineDescription( SimpleAnswerMatcher.class ) */);
     }
 
     static private void parseRussianCorpus( String path ) throws UIMAException, IOException {

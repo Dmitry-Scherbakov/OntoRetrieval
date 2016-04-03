@@ -115,7 +115,9 @@ public class TripletField extends Annotation
     }
 
     public boolean isBaseFieldPositioned() {
-        return Models.isPositionedPronoun( m_Field.getCoveredText() );
+        //
+        // m_Field could be null if it was resolved for POS collision, by using resolveCollisions function
+        return m_Field == null ? false : Models.isPositionedPronoun( m_Field.getCoveredText() );
     }
 
     public TripletField clone() {
